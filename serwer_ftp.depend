@@ -1,0 +1,31 @@
+# depslib dependency file v1.0
+1623034392 source:c:\users\goscu\desktop\serwer_ftp\main.cpp
+	<iostream>
+	<map>
+	<fstream>
+	<string>
+	<vector>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"SFML/Network.hpp"
+	"Servo.h"
+
+1623037712 source:c:\users\goscu\desktop\serwer_ftp\servo.cpp
+	"Servo.h"
+
+1623037204 c:\users\goscu\desktop\serwer_ftp\servo.h
+	<iostream>
+	<map>
+	<fstream>
+	<string>
+	<vector>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"SFML/Network.hpp"
+	"myFile.h"
+
+1623037341 c:\users\goscu\desktop\serwer_ftp\myfile.h
+	<string>
+
