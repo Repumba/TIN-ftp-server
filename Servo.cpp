@@ -12,7 +12,7 @@ string ExePath() {
     char buffer[MAX_PATH] = { 0 };
     GetModuleFileName( NULL, buffer, MAX_PATH );
     string s = buffer;
-    int pos = s.find_last_of("\\");
+    int pos = s.find_last_of("\\")+1;
     return s.substr(0, pos);
 }
 #endif // _WIN32
@@ -35,6 +35,20 @@ Servo::Servo(int portNum){
 
 Servo::~Servo(){
     client.disconnect();
+}
+
+string Servo::make_windows_path(string s){
+    for(int i=0; i<s.size(); ++i)
+        if(s[i] == '/')
+            s[i] = '\\';
+    return s;
+}
+
+string Servo::make_linux_path(string s){
+    for(int i=0; i<s.size(); ++i)
+        if(s[i] == '\\')
+            s[i] = '/';
+    return s;
 }
 
 int Servo::chars_to_int(char* tab){
@@ -72,6 +86,10 @@ long long Servo::hash_password(string pas){
 }
 
 void Servo::update_fs(){
+    for(int i=0; i<pliki.size(); ++i)
+        delete pliki[i];
+    pliki.clear();
+
 #ifdef _WIN32
     string system_path = ExePath();
     system("dir /S /B > temp.txt");
@@ -104,28 +122,23 @@ void Servo::update_fs(){
     string sciezka, plik, s;
     while(f >> s){
         if(s[0] == '.'){
-            sciezka = s;
-            sciezka[sciezka.size()-1] = '/';
+            if(sciezka.size() == 2){
+                sciezka = "";
+            } else {
+                sciezka = s.substr(2, s.size()-3);
+                sciezka += "/";
+            }
             continue;
         }
-        if(s[s.size()-1] == '/'){ //folder
-            MyFile* nowy_plik = new MyFile;
-            nowy_plik->isDir = true;
-            nowy_plik->name = s;
-            nowy_plik->path = sciezka;
-            pliki.push_back(nowy_plik);
-        } else{ //not folder
-            MyFile* nowy_plik = new MyFile;
-            nowy_plik->name = s;
-            nowy_plik->path = sciezka;
-            pliki.push_back(nowy_plik);
-        }
+        MyFile* nowy_plik = new MyFile;
+        nowy_plik->name = s;
+        nowy_plik->path = sciezka;
+        nowy_plik->isDir = s.find_last_of(".") == -1 ? true : false;
+        pliki.push_back(nowy_plik);
     }
     f.close();
-    //system("rm temp.txt");
-    system("del temp.txt");
+    system("rm temp.txt");
     return;
-
 #endif // _WIN32
 }
 
@@ -169,39 +182,6 @@ bool Servo::check_password(string u, string p){
     return false;
 }
 
-int Servo::send_file(){
-    char np[100]; //nazwa pliku
-    size_t received;
-    client.receive(np, 100, received);
-    string nazwa_pliku = np;
-    fstream pliczek;
-    pliczek.open(path + nazwa_pliku, ios_base::in);
-    if(!pliczek.is_open()){
-        cout << "Error" << endl;
-        return -1;
-    }
-    //calculates the size of the file
-    long beg, fin;
-    beg = pliczek.tellg();
-    pliczek.seekg(0, ios::end);
-    fin = pliczek.tellg();
-    int size_of_file = fin-beg;
-    //moves to the beginning of the file
-    pliczek.clear();
-    pliczek.seekg(0, ios::beg);
-    char tab[size_of_file];
-    int w=0;
-    while(!pliczek.eof()){
-        pliczek.get(tab[w++]);
-    }
-    if(client.send(int_to_chars(size_of_file), 30) != sf::Socket::Done) //send to client the size of the file
-        cout << "Error" << endl;
-    if(client.send(tab, size_of_file) != sf::Socket::Done)
-        cout << "Error" << endl;
-
-    return 0;
-}
-
 int Servo::send_ls(){
     char ls[1000];
     int w=0;
@@ -231,6 +211,43 @@ bool Servo::exist_file(string s){
     return false;
 }
 
+int Servo::send_file(){
+    char np[100]; //nazwa pliku
+    size_t received;
+    client.receive(np, 100, received);
+    string nazwa_pliku = np;
+    fstream pliczek;
+    pliczek.open(path+nazwa_pliku, fstream::in);
+    if(!pliczek.is_open()){
+        cout << "Error" << endl;
+        return -1;
+    }
+    //calculates the size of the file
+    long beg, fin;
+    beg = pliczek.tellg();
+    pliczek.seekg(0, ios::end);
+    fin = pliczek.tellg();
+    int size_of_file = fin-beg;
+    //moves to the beginning of the file
+    pliczek.clear();
+    pliczek.seekg(0, ios::beg);
+
+    char tab[size_of_file+1];
+    int w=0;
+    while(!pliczek.eof()){
+        pliczek.get(tab[w++]);
+    }
+    tab[size_of_file] = '\0';
+    cout << tab << endl;
+    if(client.send(int_to_chars(size_of_file), 100) != sf::Socket::Done) //send to client the size of the file
+        cout << "Error" << endl;
+    if(client.send(tab, size_of_file) != sf::Socket::Done)
+        cout << "Error" << endl;
+
+
+    return 0;
+}
+
 int Servo::receive_file(){
     char np[100];
     size_t received;
@@ -242,16 +259,19 @@ int Servo::receive_file(){
     client.receive(np, 100, received); //rozmiar pliku
     int rozmiar_pliku = chars_to_int(np);
     fstream pliczek;
-    pliczek.open(path + nazwa_pliku, ios_base::out);
+    pliczek.open(path+nazwa_pliku, fstream::out);
     if(!pliczek.is_open()){
         cout << "Error" << endl;
         return -1;
     }
-    char dane[rozmiar_pliku];
+    char dane[rozmiar_pliku+1];
     client.receive(dane, rozmiar_pliku, received);
-    pliczek << (string)dane;
+    dane[rozmiar_pliku] = '\0';
+    pliczek << dane;
     cout << dane << endl;
     pliczek.close();
+
+    this->update_fs();
     return 0;
 }
 
@@ -266,15 +286,22 @@ int Servo::delete_file(){
     string abs_path = path + nazwa_pliku;
     for(int i=0; i<pliki.size(); ++i){
         if(pliki[i]->path + pliki[i]->name == abs_path){
+#ifdef _WIN32
             if(pliki[i]->isDir){
-                //TODO
-                return -1;
+                abs_path = "rmdir /Q/S " + make_windows_path(abs_path);
+            } else {
+                abs_path = "del " + make_windows_path(abs_path);
             }
-            abs_path = "rm " + abs_path;
             system(abs_path.c_str());
-            delete pliki[i];
-            pliki[i] = pliki[pliki.size()-1];
-            pliki.pop_back();
+#else
+            if(pliki[i]->isDir){
+                abs_path = "rm -r " + abs_path;
+            } else {
+                abs_path = "rm " + abs_path;
+            }
+            system(abs_path.c_str());
+#endif
+            this->update_fs();
             return 0;
         }
     }
@@ -289,11 +316,13 @@ int Servo::make_directory(){
     if(exist_file(nazwa_folderu)){
         return -1;
     }
-    MyFile* new_dir = new MyFile;
-    new_dir->isDir = true;
-    new_dir->name = nazwa_folderu;
-    new_dir->path = path;
-    pliki.push_back(new_dir);
+    string abs_path = "mkdir " + path + nazwa_folderu;
+#ifdef _WIN32
+    system(make_windows_path(abs_path).c_str());
+#else
+    system(abs_path.c_str());
+#endif // _WIN32
+    this->update_fs();
     return 0;
 }
 
@@ -307,11 +336,11 @@ int Servo::change_directory(){
         for(unsigned int i=0; i<path.size(); ++i)
             if(path[i] == '/')
                 ++zaglebienie;
-        if(zaglebienie < 2) //nie da sie bardziej cofnac
+        if(zaglebienie < 1) //nie da sie bardziej cofnac
             return -1;
         int w = path.size()-1;
         path[w--] = '\0';
-        while(path[w] != '/')
+        while(w>=0 && path[w] != '/')
             path[w--] = '\0';
         return 0;
     }
@@ -321,11 +350,11 @@ int Servo::change_directory(){
             if(!pliki[i]->isDir){
                 return -1;
             }
-            path += "/" + nazwa_folderu;
+            path += nazwa_folderu + "/";
             return 0;
         }
     }
-    return 0;
+    return -1;
 }
 
 int Servo::lock_file(){

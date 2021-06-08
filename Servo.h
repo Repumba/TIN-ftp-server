@@ -19,7 +19,7 @@ private:
     long long p = 997;
     sf::TcpListener listener;
     sf::TcpSocket client;
-    std::string path="/";
+    std::string path="";
 
     long long hash_password(std::string);
     void update_fs();
@@ -38,6 +38,8 @@ private:
 
     int chars_to_int(char*);
     char* int_to_chars(int);
+    std::string make_windows_path(std::string);
+    std::string make_linux_path(std::string);
 public:
     Servo(); //tylko do testow - potem wywalic
     Servo(int);

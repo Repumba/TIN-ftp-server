@@ -83,19 +83,17 @@ int Klient::ask_send_file(){
         return -1;
     server.send(nazwa_pliku, 100);
 
-    char rozmiar_char[30];
+    char rozmiar_char[100];
     size_t received;
-    server.receive(rozmiar_char, 30, received);
+    server.receive(rozmiar_char, 100, received);
     int rozmiar = chars_to_int(rozmiar_char);
 
     char plik[rozmiar];
-    string p = plik;
     server.receive(plik, rozmiar, received);
 
     fstream f;
-    f.open(lokalny_plik, ios_base::out);
-    //for(int i=0; i<rozmiar; ++i)
-    f << p;
+    f.open(lokalny_plik, fstream::out);
+    f << plik;
     f.close();
 
     return 0;
@@ -109,7 +107,7 @@ int Klient::ask_receive_file(){
     server.send(nazwa_pliku, 100);
     //calculates the size of the file
     fstream pliczek;
-    pliczek.open(lokalny_plik);
+    pliczek.open(lokalny_plik, fstream::in);
     long beg, fin;
     beg = pliczek.tellg();
     pliczek.seekg(0, ios::end);
@@ -125,6 +123,7 @@ int Klient::ask_receive_file(){
     while(!pliczek.eof()){
         pliczek.get(plik[i++]);
     }
+    cout << (string)plik << endl;
     server.send(plik, size_of_file);
     return 0;
 }
