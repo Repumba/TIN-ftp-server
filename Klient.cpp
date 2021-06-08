@@ -6,7 +6,8 @@ Klient::Klient(){
 }
 
 Klient::Klient(string ip, int portNum){
-    server.connect(ip, portNum);
+    if(server.connect(ip, portNum) != sf::Socket::Done)
+        error_handler(1);
 }
 Klient::~Klient(){
     server.disconnect();
@@ -15,7 +16,7 @@ Klient::~Klient(){
 int Klient::chars_to_int(char* tab){
     string s = tab;
     int ret = 0;
-    for(int i=0; i<s.size(); ++i){
+    for(unsigned int i=0; i<s.size(); ++i){
         ret = ret*10 + tab[i]-'0';
     }
     return ret;
@@ -42,7 +43,7 @@ int Klient::send_command(char c){
     comm[0] = c;
     comm[1] = '\0';
     if(server.send(comm, 5) != sf::Socket::Done){
-        return -1;
+        return 1;
     }
     return 0;
 }
@@ -52,7 +53,7 @@ char* Klient::read_input(string info, int rozmiar=100){
     cout << info;
     cin >> s;
     char* ret = new char[rozmiar];
-    for(int i=0; i<s.size(); ++i){
+    for(unsigned int i=0; i<s.size(); ++i){
         ret[i] = s[i];
     }
     ret[s.size()] = '\0';
@@ -61,11 +62,11 @@ char* Klient::read_input(string info, int rozmiar=100){
 
 int Klient::ask_ls(){
     if(send_command('a') != 0)
-        return -1;
+        return 1;
     char output[1000];
     size_t received;
     if(server.receive(output, 1000, received) != sf::Socket::Done){
-        return -1;
+        return 1;
     }
     if(received > 0){
         string s = output;
@@ -80,16 +81,19 @@ int Klient::ask_send_file(){
     char* nazwa_pliku = read_input("Podaj nazwe pliku na serwerze\n");
     char* lokalny_plik = read_input("Podaj nazwe pliku lokalnego\n");
     if(send_command('b') != 0)
-        return -1;
-    server.send(nazwa_pliku, 100);
+        return 1;
+    if(server.send(nazwa_pliku, 100) != sf::Socket::Done)
+        return 1;
 
     char rozmiar_char[100];
     size_t received;
-    server.receive(rozmiar_char, 100, received);
+    if(server.receive(rozmiar_char, 100, received) != sf::Socket::Done)
+        return 1;
     int rozmiar = chars_to_int(rozmiar_char);
 
     char plik[rozmiar];
-    server.receive(plik, rozmiar, received);
+    if(server.receive(plik, rozmiar, received) != sf::Socket::Done)
+        return 1;
 
     fstream f;
     f.open(lokalny_plik, fstream::out);
@@ -103,8 +107,9 @@ int Klient::ask_receive_file(){
     char* nazwa_pliku = read_input("Podaj nazwe pliku na serwerze\n");
     char* lokalny_plik = read_input("Podaj nazwe pliku lokalnego\n");
     if(send_command('c') != 0)
-        return -1;
-    server.send(nazwa_pliku, 100);
+        return 1;
+    if(server.send(nazwa_pliku, 100) != sf::Socket::Done)
+        return 1;
     //calculates the size of the file
     fstream pliczek;
     pliczek.open(lokalny_plik, fstream::in);
@@ -114,7 +119,8 @@ int Klient::ask_receive_file(){
     fin = pliczek.tellg();
     int size_of_file = fin-beg;
     //moves to the beginning of the file
-    server.send(int_to_chars(size_of_file), 100);
+    if(server.send(int_to_chars(size_of_file), 100) != sf::Socket::Done)
+        return 1;
     pliczek.clear();
     pliczek.seekg(0, ios::beg);
 
@@ -124,31 +130,35 @@ int Klient::ask_receive_file(){
         pliczek.get(plik[i++]);
     }
     cout << (string)plik << endl;
-    server.send(plik, size_of_file);
+    if(server.send(plik, size_of_file) != sf::Socket::Done)
+        return 1;
     return 0;
 }
 
 int Klient::ask_delete_file(){
     char* nazwa_pliku = read_input("Podaj nazwe pliku na serwerze\n");
     if(send_command('d') != 0)
-        return -1;
-    server.send(nazwa_pliku, 100);
+        return 1;
+    if(server.send(nazwa_pliku, 100) != sf::Socket::Done)
+        return 1;
     return 0;
 }
 
 int Klient::ask_make_directory(){
     char* nazwa_folderu = read_input("Podaj nazwe nowego folderu na serwerze\n");
     if(send_command('e') != 0)
-        return -1;
-    server.send(nazwa_folderu, 100);
+        return 1;
+    if(server.send(nazwa_folderu, 100) != sf::Socket::Done)
+        return 1;
     return 0;
 }
 
 int Klient::ask_change_directory(){
     char* nowy_folder = read_input("Do jakiego folderu przejsc?\n");
     if(send_command('f') != 0)
-        return -1;
-    server.send(nowy_folder, 100);
+        return 1;
+    if(server.send(nowy_folder, 100) != sf::Socket::Done)
+        return 1;
     return 0;
 }
 
@@ -159,9 +169,11 @@ int Klient::ask_lock_file(){
     if(new_mask[0] == '2')
         return 0;
     if(send_command('g') != 0)
-        return -1;
-    server.send(selected_file, 100);
-    server.send(new_mask, 5);
+        return 1;
+    if(server.send(selected_file, 100) != sf::Socket::Done)
+        return 1;
+    if(server.send(new_mask, 5) != sf::Socket::Done)
+        return 1;
     return 0;
 }
 
@@ -172,10 +184,54 @@ int Klient::ask_unlock_file(){
     if(new_mask[0] == '2')
         return 0;
     if(send_command('h') != 0)
-        return -1;
-    server.send(selected_file, 100);
-    server.send(new_mask, 100);
+        return 1;
+    if(server.send(selected_file, 100) != sf::Socket::Done)
+        return 1;
+    if(server.send(new_mask, 100) != sf::Socket::Done)
+        return 1;
     return 0;
+}
+
+void Klient::error_handler(int err_code){
+    char server_error_code[5];
+    size_t received;
+    if(server.receive(server_error_code, 5, received) != sf::Socket::Done)
+        err_code = 1;
+    else
+        if(err_code == 0)
+            err_code = (int)server_error_code[0];
+
+    switch(err_code){
+    case 1:
+        cout << "Connection error with server " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
+        server.disconnect();
+        exit(1);
+    case 2:
+        cout << "Wrong login data " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
+        break;
+    case 3:
+        cout << "Tried to access not existing file " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
+        break;
+    case 4:
+        cout << "Tried to modify already existing file " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
+        break;
+    case 5:
+        cout << "Tried to access read-blocked file " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
+        break;
+    case 6:
+        cout << "Tried to access write-blocked file " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
+        break;
+    case 7:
+        cout << "Tried to overcome restrictions " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
+        break;
+    case 8:
+        cout << "Tried to open file as a directory " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
+        break;
+    case 10:
+        cout << "Undefined behavior " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
+        break;
+    }
+    return;
 }
 
 void Klient::wait_for_instruction(){
@@ -223,8 +279,6 @@ void Klient::wait_for_instruction(){
             cout << "h - odblokowanie pliku" << endl; //tutaj endl, aby wymusic oproznienie bufora
         }
 
-        if(kod_bledu != 0){
-            cout << "Something went wrong" << endl;
-        }
+        error_handler(kod_bledu);
     }
 }

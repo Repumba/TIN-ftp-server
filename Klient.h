@@ -21,10 +21,13 @@ private:
     int ask_change_directory();
     int ask_lock_file();
     int ask_unlock_file();
+
     int chars_to_int(char*);
     int send_command(char);
     char* int_to_chars(int);
     char* read_input(std::string, int);
+
+    void error_handler(int);
 public:
     Klient(); //do testow - potem wywalic
     Klient(std::string, int);

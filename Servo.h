@@ -24,7 +24,7 @@ private:
     long long hash_password(std::string);
     void update_fs();
     void change_mask(std::string, int);
-    void wait_for_password();
+    int wait_for_password();
     int send_ls();
     bool check_password(std::string, std::string);
     int send_file();
@@ -40,6 +40,8 @@ private:
     char* int_to_chars(int);
     std::string make_windows_path(std::string);
     std::string make_linux_path(std::string);
+
+    void error_handler(int);
 public:
     Servo(); //tylko do testow - potem wywalic
     Servo(int);

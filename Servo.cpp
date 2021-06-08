@@ -1,8 +1,6 @@
 #include "Servo.h"
 using namespace std;
 
-#define _WIN32 //to usunac
-
 #ifdef _WIN32
 #include <string>
 #include <windows.h>
@@ -21,15 +19,17 @@ string ExePath() {
 Servo::Servo(){
     cout << "Servo:\n";
     this->update_fs();
-    for(int i=0; i<pliki.size(); ++i){
+    for(unsigned int i=0; i<pliki.size(); ++i){
         cout << pliki[i]->path << " " << pliki[i]->name << endl;
     }
 }
 
 Servo::Servo(int portNum){
     listener.listen(portNum);
-    if(listener.accept(client) != sf::Socket::Done)
-        cout << "Error" << endl;
+    if(listener.accept(client) != sf::Socket::Done){
+        cout << "Nie udalo sie polaczyc" << endl;
+        exit(1);
+    }
     this->update_fs();
 }
 
@@ -38,14 +38,14 @@ Servo::~Servo(){
 }
 
 string Servo::make_windows_path(string s){
-    for(int i=0; i<s.size(); ++i)
+    for(unsigned int i=0; i<s.size(); ++i)
         if(s[i] == '/')
             s[i] = '\\';
     return s;
 }
 
 string Servo::make_linux_path(string s){
-    for(int i=0; i<s.size(); ++i)
+    for(unsigned int i=0; i<s.size(); ++i)
         if(s[i] == '\\')
             s[i] = '/';
     return s;
@@ -54,7 +54,7 @@ string Servo::make_linux_path(string s){
 int Servo::chars_to_int(char* tab){
     string s = tab;
     int ret = 0;
-    for(int i=0; i<s.size(); ++i){
+    for(unsigned int i=0; i<s.size(); ++i){
         ret = ret*10 + tab[i]-'0';
     }
     return ret;
@@ -86,7 +86,7 @@ long long Servo::hash_password(string pas){
 }
 
 void Servo::update_fs(){
-    for(int i=0; i<pliki.size(); ++i)
+    for(unsigned int i=0; i<pliki.size(); ++i)
         delete pliki[i];
     pliki.clear();
 
@@ -100,15 +100,13 @@ void Servo::update_fs(){
         if(s.size() <= system_path.size())
             continue;
         s = s.substr(system_path.size(), MAX_PATH);
-        for(int i=0; i<s.size(); ++i)
-            if(s[i] == '\\')
-                s[i] = '/';
+        s = make_linux_path(s);
         int pos = s.find_last_of("/")+1;
         MyFile* new_file = new MyFile;
         new_file->path = s.substr(0,pos);
         new_file->name = s.substr(pos, s.size());
         new_file->mask = 0;
-        new_file->isDir = new_file->name.find_last_of(".") == -1 ? true : false;
+        new_file->isDir = new_file->name.find(".") == string::npos ? true : false;
         pliki.push_back(new_file);
     }
     f.close();
@@ -133,7 +131,7 @@ void Servo::update_fs(){
         MyFile* nowy_plik = new MyFile;
         nowy_plik->name = s;
         nowy_plik->path = sciezka;
-        nowy_plik->isDir = s.find_last_of(".") == -1 ? true : false;
+        nowy_plik->isDir = s.find(".") == string::npos ? true : false;
         pliki.push_back(nowy_plik);
     }
     f.close();
@@ -142,22 +140,24 @@ void Servo::update_fs(){
 #endif // _WIN32
 }
 
-void Servo::wait_for_password(){
-//    string username, password;
+int Servo::wait_for_password(){
     char username[100];
     char password[100];
     size_t received;
-    if(client.receive(username, 100, received) != sf::Socket::Done)
-        cout << "Error";
-    if(client.receive(password, 100, received) != sf::Socket::Done)
-        cout << "Error";
+    if(client.receive(username, 100, received) != sf::Socket::Done){
+        return 1;
+    }
+    if(client.receive(password, 100, received) != sf::Socket::Done){
+        return 1;
+    }
 
     if(check_password(username, password)){
         path = username;
         path += "/";
     }else{
-        client.send("Wrong password", 32);
+        return 2;
     }
+    return 0;
 }
 
 bool Servo::check_password(string u, string p){
@@ -166,8 +166,7 @@ bool Servo::check_password(string u, string p){
     f.open("passwd.txt", ios::in);
     if(!f.is_open()){
         cout << "Error no passwd file" << endl;
-        exit(-1);
-//        throw exception ("No passwd detected");
+        exit(1);
     }
     string wu;
     long long wh;
@@ -194,17 +193,14 @@ int Servo::send_ls(){
         }
     }
     ls[w++] = '\0';
-//    client.send(int_to_chars(w), 30);
-//    if(client.send(ls, w) != sf::Socket::Done)
     if(client.send(ls, 1000) != sf::Socket::Done)
-        cout << "Error" << endl;
+        return 1;
     return 0;
 }
 
 bool Servo::exist_file(string s){
     for(unsigned int i=0; i<pliki.size(); ++i)
         if(pliki[i]->path + pliki[i]->name == path + s){
-            cout << "Exist" << endl;
             return true;
         }
 
@@ -214,12 +210,12 @@ bool Servo::exist_file(string s){
 int Servo::send_file(){
     char np[100]; //nazwa pliku
     size_t received;
-    client.receive(np, 100, received);
+    if(client.receive(np, 100, received) != sf::Socket::Done)
+        return 1;
     string nazwa_pliku = np;
     fstream pliczek;
     pliczek.open(path+nazwa_pliku, fstream::in);
     if(!pliczek.is_open()){
-        cout << "Error" << endl;
         return -1;
     }
     //calculates the size of the file
@@ -238,12 +234,11 @@ int Servo::send_file(){
         pliczek.get(tab[w++]);
     }
     tab[size_of_file] = '\0';
-    cout << tab << endl;
-    if(client.send(int_to_chars(size_of_file), 100) != sf::Socket::Done) //send to client the size of the file
-        cout << "Error" << endl;
-    if(client.send(tab, size_of_file) != sf::Socket::Done)
-        cout << "Error" << endl;
 
+    if(client.send(int_to_chars(size_of_file), 100) != sf::Socket::Done) //send to client the size of the file
+        return 1;
+    if(client.send(tab, size_of_file) != sf::Socket::Done) //send the file to the client
+        return 1;
 
     return 0;
 }
@@ -251,21 +246,28 @@ int Servo::send_file(){
 int Servo::receive_file(){
     char np[100];
     size_t received;
-    client.receive(np, 100, received); //nazwa pliku
+    if(client.receive(np, 100, received) != sf::Socket::Done) //nazwa pliku
+        return 1;
     string nazwa_pliku = np;
-    if(exist_file(nazwa_pliku)){
-        return -1;
-    }
-    client.receive(np, 100, received); //rozmiar pliku
+    if(client.receive(np, 100, received) != sf::Socket::Done) //rozmiar pliku
+        return 1;
+
     int rozmiar_pliku = chars_to_int(np);
+    char dane[rozmiar_pliku+1];
+
+    if(exist_file(nazwa_pliku)){
+        if(client.receive(dane, rozmiar_pliku, received) != sf::Socket::Done) //wczytanie, zeby sie nie popsulo
+            return 1;
+        return 4;
+    }
+
     fstream pliczek;
     pliczek.open(path+nazwa_pliku, fstream::out);
     if(!pliczek.is_open()){
-        cout << "Error" << endl;
         return -1;
     }
-    char dane[rozmiar_pliku+1];
-    client.receive(dane, rozmiar_pliku, received);
+    if(client.receive(dane, rozmiar_pliku, received) != sf::Socket::Done)
+        return 1;
     dane[rozmiar_pliku] = '\0';
     pliczek << dane;
     cout << dane << endl;
@@ -278,13 +280,14 @@ int Servo::receive_file(){
 int Servo::delete_file(){
     char np[100];
     size_t received;
-    client.receive(np, 100, received); //nazwa pliku
+    if(client.receive(np, 100, received) != sf::Socket::Done) //nazwa pliku
+        return 1;
     string nazwa_pliku = np;
     if(!exist_file(nazwa_pliku)){
-        return -1;
+        return 3;
     }
     string abs_path = path + nazwa_pliku;
-    for(int i=0; i<pliki.size(); ++i){
+    for(unsigned int i=0; i<pliki.size(); ++i){
         if(pliki[i]->path + pliki[i]->name == abs_path){
 #ifdef _WIN32
             if(pliki[i]->isDir){
@@ -311,10 +314,11 @@ int Servo::delete_file(){
 int Servo::make_directory(){
     char np[100];
     size_t received;
-    client.receive(np, 100, received); //nazwa nowego folderu
+    if(client.receive(np, 100, received) != sf::Socket::Done) //nazwa nowego folderu
+        return 1;
     string nazwa_folderu = np;
     if(exist_file(nazwa_folderu)){
-        return -1;
+        return 4;
     }
     string abs_path = "mkdir " + path + nazwa_folderu;
 #ifdef _WIN32
@@ -329,7 +333,8 @@ int Servo::make_directory(){
 int Servo::change_directory(){
     char np[100];
     size_t received;
-    client.receive(np, 100, received); //nazwa nowego folderu
+    if(client.receive(np, 100, received) != sf::Socket::Done) //nazwa nowego folderu
+        return 1;
     string nazwa_folderu = np;
     if(nazwa_folderu == ".."){
         int zaglebienie=0;
@@ -337,7 +342,7 @@ int Servo::change_directory(){
             if(path[i] == '/')
                 ++zaglebienie;
         if(zaglebienie < 1) //nie da sie bardziej cofnac
-            return -1;
+            return 7;
         int w = path.size()-1;
         path[w--] = '\0';
         while(w>=0 && path[w] != '/')
@@ -345,10 +350,10 @@ int Servo::change_directory(){
         return 0;
     }
     string abs_path = path + nazwa_folderu;
-    for(int i=0; i<pliki.size(); ++i){
+    for(unsigned int i=0; i<pliki.size(); ++i){
         if(pliki[i]->path + pliki[i]->name == abs_path){
             if(!pliki[i]->isDir){
-                return -1;
+                return 8;
             }
             path += nazwa_folderu + "/";
             return 0;
@@ -360,15 +365,19 @@ int Servo::change_directory(){
 int Servo::lock_file(){
     char np[100]; //nazwa pliku
     size_t received;
-    client.receive(np, 100, received);
+    if(client.receive(np, 100, received) != sf::Socket::Done)
+        return 1;
     string nazwa_pliku = np;
+    if(client.receive(np, 5, received) != sf::Socket::Done)
+        return 1;
+
     if(!exist_file(nazwa_pliku)){
-        return -1;
+        return 3;
     }
-    client.receive(np, 5, received);
+
     char mask = np[0];
     string abs_path = path + nazwa_pliku;
-    for(int i=0; i<pliki.size(); ++i){
+    for(unsigned int i=0; i<pliki.size(); ++i){
         if(pliki[i]->path + pliki[i]->name == abs_path){
             pliki[i]->mask = pliki[i]->mask | mask;
             return 0;
@@ -380,16 +389,20 @@ int Servo::lock_file(){
 int Servo::unlock_file(){
     char np[100]; //nazwa pliku
     size_t received;
-    client.receive(np, 100, received);
+    if(client.receive(np, 100, received) != sf::Socket::Done)
+        return 1;
     string nazwa_pliku = np;
+    if(client.receive(np, 5, received) != sf::Socket::Done)
+        return 1;
+
     if(!exist_file(nazwa_pliku)){
-        return -1;
+        return 3;
     }
-    client.receive(np, 5, received);
+
     char mask = np[0];
     mask = ~mask;
     string abs_path = path + nazwa_pliku;
-    for(int i=0; i<pliki.size(); ++i){
+    for(unsigned int i=0; i<pliki.size(); ++i){
         if(pliki[i]->path + pliki[i]->name == abs_path){
             pliki[i]->mask = pliki[i]->mask & mask;
             return 0;
@@ -398,13 +411,54 @@ int Servo::unlock_file(){
     return -1;
 }
 
+void Servo::error_handler(int err_code){
+    if(err_code == -1)
+        err_code = 10;
+    char code_for_client[5];
+    code_for_client[0] = (char)err_code;
+    if(client.send(code_for_client, 5) != sf::Socket::Done)
+        err_code = 1;
+
+    switch(err_code){
+    case 1:
+        cout << "Connection error with client " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
+        client.disconnect();
+        exit(1);
+    case 2:
+        cout << "Wrong login data " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
+        break;
+    case 3:
+        cout << "Tried to access not existing file " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
+        break;
+    case 4:
+        cout << "Tried to modify already existing file " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
+        break;
+    case 5:
+        cout << "Tried to access read-blocked file " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
+        break;
+    case 6:
+        cout << "Tried to access write-blocked file " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
+        break;
+    case 7:
+        cout << "Tried to overcome restrictions " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
+        break;
+    case 8:
+        cout << "Tried to open file as a directory " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
+        break;
+    case 10:
+        cout << "Undefined behavior " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
+        break;
+    }
+    return;
+}
+
 void Servo::wait_for_command(){
     char comm[5];
     size_t received;
-    if(client.receive(comm, 5, received) != sf::Socket::Done)
-        cout << "Error" << endl;
-
     int kod_bledu = 0;
+    if(client.receive(comm, 5, received) != sf::Socket::Done)
+        error_handler(1);
+
     switch(comm[0]){
     case 'a':
         kod_bledu = send_ls();
@@ -430,9 +484,10 @@ void Servo::wait_for_command(){
     case 'h':
         kod_bledu = unlock_file();
         break;
+    default:
+        kod_bledu = -1;
     }
-    cout << comm[0] << endl;
-    if(kod_bledu != 0){
-        cout << "Something went wrong" << endl;
-    }
+    //cout << comm[0] << endl;
+    error_handler(kod_bledu);
+
 }
