@@ -34,8 +34,10 @@ private:
     int change_directory();
     int lock_file();
     int unlock_file();
-    int chars_to_int(char*, int);
     bool exist_file(std::string);
+
+    int chars_to_int(char*, int);
+    char* int_to_chars(int);
 public:
     Servo(int);
     ~Servo();

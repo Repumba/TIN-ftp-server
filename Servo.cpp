@@ -20,6 +20,22 @@ int Servo::chars_to_int(char* tab, int len){
     return ret;
 }
 
+char* Servo::int_to_chars(int val){
+    char* output = new char[30];
+    int i = 30;
+    while(val > 0){
+        output[--i] = val%10 + '0';
+        val /= 10;
+    }
+    int w = 0;
+    while(w+i < 30){
+        output[w] = output[i+w];
+        ++w;
+    }
+    output[w] = '\0';
+    return output;
+}
+
 long long Servo::hash_password(string pas){
     if(pas.size() <= 0)
         return -1;
@@ -124,6 +140,8 @@ int Servo::send_file(){
     while(!pliczek.eof()){
         pliczek.get(tab[w++]);
     }
+    if(client.send(int_to_chars(size_of_file), 30) != sf::Socket::Done) //send to client the size of the file
+        cout << "Error" << endl;
     if(client.send(tab, size_of_file) != sf::Socket::Done)
         cout << "Error" << endl;
 
@@ -131,18 +149,20 @@ int Servo::send_file(){
 }
 
 int Servo::send_ls(){
-    char ls[1001];
+    char ls[1000];
     int w=0;
-    for(unsigned int i=0; i<pliki.size() && w<1000; ++i){
+    for(unsigned int i=0; i<pliki.size() && w<999; ++i){
         if(pliki[i]->path == path){
-            for(unsigned int j=0; j<pliki[i]->name.size() && w<1000; ++j){
+            for(unsigned int j=0; j<pliki[i]->name.size() && w<999; ++j){
                 ls[w++] = pliki[i]->name[j];
             }
         }
         ls[w++] = '\n';
     }
     ls[w++] = '\0';
-    if(client.send(ls, w) != sf::Socket::Done)
+//    client.send(int_to_chars(w), 30);
+//    if(client.send(ls, w) != sf::Socket::Done)
+    if(client.send(ls, 1000) != sf::Socket::Done)
         cout << "Error" << endl;
 }
 
