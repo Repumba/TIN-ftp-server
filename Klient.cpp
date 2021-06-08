@@ -8,6 +8,15 @@ Klient::Klient(){
 Klient::Klient(string ip, int portNum){
     if(server.connect(ip, portNum) != sf::Socket::Done)
         error_handler(1);
+
+    char new_port[10];
+    size_t received;
+    if(server.receive(new_port, 10, received) != sf::Socket::Done)
+        error_handler(1);
+    server.disconnect();
+
+    if(server.connect(ip, chars_to_int(new_port)) != sf::Socket::Done)
+        error_handler(1);
 }
 Klient::~Klient(){
     server.disconnect();
@@ -266,6 +275,10 @@ void Klient::wait_for_instruction(){
         case 'h':
             kod_bledu = ask_unlock_file();
             break;
+        case 'x':
+            server.disconnect();
+            cout << "Bye!" << endl;
+            exit(0);
         default:
             kod_bledu = 0;
             cout << "Dostepne polecenia:\n";
@@ -276,7 +289,8 @@ void Klient::wait_for_instruction(){
             cout << "e - utworzenie folderu\n";
             cout << "f - zmienienie aktualnego folderu\n";
             cout << "g - zablokowanie pliku\n";
-            cout << "h - odblokowanie pliku" << endl; //tutaj endl, aby wymusic oproznienie bufora
+            cout << "h - odblokowanie pliku\n"
+            cout << "x - zakoncz polaczenie" << endl; //tutaj endl, aby wymusic oproznienie bufora
         }
 
         error_handler(kod_bledu);

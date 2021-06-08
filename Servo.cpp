@@ -454,40 +454,42 @@ void Servo::error_handler(int err_code){
 
 void Servo::wait_for_command(){
     char comm[5];
-    size_t received;
     int kod_bledu = 0;
-    if(client.receive(comm, 5, received) != sf::Socket::Done)
-        error_handler(1);
+    size_t received;
 
-    switch(comm[0]){
-    case 'a':
-        kod_bledu = send_ls();
-        break;
-    case 'b':
-        kod_bledu = send_file();
-        break;
-    case 'c':
-        kod_bledu = receive_file();
-        break;
-    case 'd':
-        kod_bledu = delete_file();
-        break;
-    case 'e':
-        kod_bledu = make_directory();
-        break;
-    case 'f':
-        kod_bledu = change_directory();
-        break;
-    case 'g':
-        kod_bledu = lock_file();
-        break;
-    case 'h':
-        kod_bledu = unlock_file();
-        break;
-    default:
-        kod_bledu = -1;
+    while(true){
+        if(client.receive(comm, 5, received) != sf::Socket::Done)
+            error_handler(1);
+
+        switch(comm[0]){
+        case 'a':
+            kod_bledu = send_ls();
+            break;
+        case 'b':
+            kod_bledu = send_file();
+            break;
+        case 'c':
+            kod_bledu = receive_file();
+            break;
+        case 'd':
+            kod_bledu = delete_file();
+            break;
+        case 'e':
+            kod_bledu = make_directory();
+            break;
+        case 'f':
+            kod_bledu = change_directory();
+            break;
+        case 'g':
+            kod_bledu = lock_file();
+            break;
+        case 'h':
+            kod_bledu = unlock_file();
+            break;
+        default:
+            kod_bledu = -1;
+        }
+        //cout << comm[0] << endl;
+        error_handler(kod_bledu);
     }
-    //cout << comm[0] << endl;
-    error_handler(kod_bledu);
-
 }
