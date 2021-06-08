@@ -39,6 +39,7 @@ private:
     int chars_to_int(char*, int);
     char* int_to_chars(int);
 public:
+    Servo(); //tylko do testow - potem wywalic
     Servo(int);
     ~Servo();
     void wait_for_command();

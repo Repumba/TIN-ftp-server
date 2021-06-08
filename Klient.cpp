@@ -1,6 +1,10 @@
 #include "Klient.h"
 using namespace std;
 
+Klient::Klient(){
+
+}
+
 Klient::Klient(int portNum){
     listener.listen(portNum);
     if(listener.accept(server) != sf::Socket::Done)
@@ -146,6 +150,7 @@ int Klient::ask_change_directory(){
     if(send_command('f') != 0)
         return -1;
     server.send(nowy_folder, 100);
+    return 0;
 }
 
 int Klient::ask_lock_file(){
@@ -172,4 +177,55 @@ int Klient::ask_unlock_file(){
     server.send(selected_file, 100);
     server.send(new_mask, 5);
     return 0;
+}
+
+void Klient::wait_for_instruction(){
+    char wyb;
+    int kod_bledu;
+    while(true){
+        cout << "> ";
+        cin >> wyb;
+
+        switch(wyb){
+        case 'a':
+            kod_bledu = ask_ls();
+            break;
+        case 'b':
+            kod_bledu = ask_send_file();
+            break;
+        case 'c':
+            kod_bledu = ask_receive_file();
+            break;
+        case 'd':
+            kod_bledu = ask_delete_file();
+            break;
+        case 'e':
+            kod_bledu = ask_make_directory();
+            break;
+        case 'f':
+            kod_bledu = ask_change_directory();
+            break;
+        case 'g':
+            kod_bledu = ask_lock_file();
+            break;
+        case 'h':
+            kod_bledu = ask_unlock_file();
+            break;
+        default:
+            kod_bledu = 0;
+            cout << "Dostepne polecenia:\n";
+            cout << "a - wyswietl zawartosc folderu\n";
+            cout << "b - pobranie pliku z serwera\n";
+            cout << "c - wyslanie pliku na serwer\n";
+            cout << "d - usuniecie pliku\n";
+            cout << "e - utworzenie folderu\n";
+            cout << "f - zmienienie aktualnego folderu\n";
+            cout << "g - zablokowanie pliku\n";
+            cout << "h - odblokowanie pliku" << endl; //tutaj endl, aby wymusic oproznienie bufora
+        }
+
+        if(kod_bledu != 0){
+            cout << "Something went wrong" << endl;
+        }
+    }
 }

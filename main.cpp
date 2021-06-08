@@ -14,8 +14,8 @@ using namespace std;
 
 int main(){
 
-    Servo s();
-    Klient k();
+    Servo* s = new Servo();
+    Klient* k = new Klient();
     cout << "Hello World!" << endl;
 
     return 0;

@@ -1,6 +1,31 @@
 #include "Servo.h"
 using namespace std;
 
+#define _WIN32 //to usunac
+
+#ifdef _WIN32
+#include <string>
+#include <windows.h>
+#include <iostream>
+
+string ExePath() {
+    char buffer[MAX_PATH] = { 0 };
+    GetModuleFileName( NULL, buffer, MAX_PATH );
+    string s = buffer;
+    int pos = s.find_last_of("\\");
+    return s.substr(0, pos);
+}
+#endif // _WIN32
+
+
+Servo::Servo(){
+    cout << "Servo:\n";
+    this->update_fs();
+    for(int i=0; i<pliki.size(); ++i){
+        cout << pliki[i]->path << " " << pliki[i]->name << endl;
+    }
+}
+
 Servo::Servo(int portNum){
     listener.listen(portNum);
     if(listener.accept(client) != sf::Socket::Done)
@@ -46,8 +71,35 @@ long long Servo::hash_password(string pas){
 }
 
 void Servo::update_fs(){
-    //system("ls -1Rp > temp.txt");
-    system("dir > temp.txt");
+#ifdef _WIN32
+    string system_path = ExePath();
+    system("dir bin\\Debug\\ /S /B > temp.txt");
+    fstream f;
+    f.open("temp.txt", ios_base::in);
+    string s;
+    while(f >> s){
+        if(s.size() <= system_path.size())
+            continue;
+        s = s.substr(system_path.size(), MAX_PATH);
+        for(int i=0; i<s.size(); ++i)
+            if(s[i] == '\\')
+                s[i] = '/';
+        int pos = s.find_last_of("/")+1;
+        MyFile* new_file = new MyFile;
+        new_file->path = s.substr(0,pos);
+        new_file->name = s.substr(pos, s.size());
+        new_file->mask = 0;
+        new_file->isDir = new_file->name.find_last_of(".") == -1 ? true : false;
+        pliki.push_back(new_file);
+    }
+    f.close();
+    system("del temp.txt");
+    for(int i=0; i<pliki.size(); ++i)
+        cout << pliki[i]->name << endl;
+    return;
+#else
+    system("ls -1Rp > temp.txt");
+
     fstream f;
     f.open("temp.txt", ios::in);
     string sciezka, plik, s;
@@ -73,6 +125,9 @@ void Servo::update_fs(){
     f.close();
     //system("rm temp.txt");
     system("del temp.txt");
+    return;
+
+#endif // _WIN32
 }
 
 void Servo::wait_for_password(){
@@ -164,6 +219,7 @@ int Servo::send_ls(){
 //    if(client.send(ls, w) != sf::Socket::Done)
     if(client.send(ls, 1000) != sf::Socket::Done)
         cout << "Error" << endl;
+    return 0;
 }
 
 bool Servo::exist_file(string s){
@@ -267,6 +323,7 @@ int Servo::change_directory(){
             return 0;
         }
     }
+    return 0;
 }
 
 int Servo::lock_file(){

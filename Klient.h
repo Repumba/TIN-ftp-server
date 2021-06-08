@@ -27,7 +27,9 @@ private:
     char* int_to_chars(int);
     char* read_input(std::string);
 public:
+    Klient(); //do testow - potem wywalic
     Klient(int);
     ~Klient();
+    void wait_for_instruction();
 };
 #endif // KLIENT_H
