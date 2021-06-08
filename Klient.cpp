@@ -5,10 +5,8 @@ Klient::Klient(){
 
 }
 
-Klient::Klient(int portNum){
-    listener.listen(portNum);
-    if(listener.accept(server) != sf::Socket::Done)
-        cout << "Error" << endl;
+Klient::Klient(string ip, int portNum){
+    server.connect(ip, portNum);
 }
 Klient::~Klient(){
     server.disconnect();
@@ -49,14 +47,15 @@ int Klient::send_command(char c){
     return 0;
 }
 
-char* Klient::read_input(string info){
+char* Klient::read_input(string info, int rozmiar=100){
     string s;
     cout << info;
     cin >> s;
-    char* ret = new char[s.size()];
+    char* ret = new char[rozmiar];
     for(int i=0; i<s.size(); ++i){
         ret[i] = s[i];
     }
+    ret[s.size()] = '\0';
     return ret;
 }
 
@@ -115,16 +114,17 @@ int Klient::ask_receive_file(){
     beg = pliczek.tellg();
     pliczek.seekg(0, ios::end);
     fin = pliczek.tellg();
-    int size_of_file = beg-fin;
+    int size_of_file = fin-beg;
     //moves to the beginning of the file
+    server.send(int_to_chars(size_of_file), 100);
     pliczek.clear();
     pliczek.seekg(0, ios::beg);
 
     char plik[size_of_file];
     int i=0;
-    while(!pliczek.eof())
+    while(!pliczek.eof()){
         pliczek.get(plik[i++]);
-
+    }
     server.send(plik, size_of_file);
     return 0;
 }
@@ -175,7 +175,7 @@ int Klient::ask_unlock_file(){
     if(send_command('h') != 0)
         return -1;
     server.send(selected_file, 100);
-    server.send(new_mask, 5);
+    server.send(new_mask, 100);
     return 0;
 }
 

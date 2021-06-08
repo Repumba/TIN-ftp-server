@@ -11,7 +11,6 @@
 
 class Klient{
 private:
-    sf::TcpListener listener;
     sf::TcpSocket server;
 
     int ask_ls();
@@ -25,10 +24,10 @@ private:
     int chars_to_int(char*);
     int send_command(char);
     char* int_to_chars(int);
-    char* read_input(std::string);
+    char* read_input(std::string, int);
 public:
     Klient(); //do testow - potem wywalic
-    Klient(int);
+    Klient(std::string, int);
     ~Klient();
     void wait_for_instruction();
 };

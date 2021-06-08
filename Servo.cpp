@@ -37,9 +37,10 @@ Servo::~Servo(){
     client.disconnect();
 }
 
-int Servo::chars_to_int(char* tab, int len){
+int Servo::chars_to_int(char* tab){
+    string s = tab;
     int ret = 0;
-    for(int i=0; i<len; ++i){
+    for(int i=0; i<s.size(); ++i){
         ret = ret*10 + tab[i]-'0';
     }
     return ret;
@@ -73,7 +74,7 @@ long long Servo::hash_password(string pas){
 void Servo::update_fs(){
 #ifdef _WIN32
     string system_path = ExePath();
-    system("dir bin\\Debug\\ /S /B > temp.txt");
+    system("dir /S /B > temp.txt");
     fstream f;
     f.open("temp.txt", ios_base::in);
     string s;
@@ -94,8 +95,6 @@ void Servo::update_fs(){
     }
     f.close();
     system("del temp.txt");
-    for(int i=0; i<pliki.size(); ++i)
-        cout << pliki[i]->name << endl;
     return;
 #else
     system("ls -1Rp > temp.txt");
@@ -186,7 +185,7 @@ int Servo::send_file(){
     beg = pliczek.tellg();
     pliczek.seekg(0, ios::end);
     fin = pliczek.tellg();
-    int size_of_file = beg-fin;
+    int size_of_file = fin-beg;
     //moves to the beginning of the file
     pliczek.clear();
     pliczek.seekg(0, ios::beg);
@@ -211,8 +210,8 @@ int Servo::send_ls(){
             for(unsigned int j=0; j<pliki[i]->name.size() && w<999; ++j){
                 ls[w++] = pliki[i]->name[j];
             }
+            ls[w++] = '\n';
         }
-        ls[w++] = '\n';
     }
     ls[w++] = '\0';
 //    client.send(int_to_chars(w), 30);
@@ -224,8 +223,10 @@ int Servo::send_ls(){
 
 bool Servo::exist_file(string s){
     for(unsigned int i=0; i<pliki.size(); ++i)
-        if(pliki[i]->path + pliki[i]->name == path + s)
+        if(pliki[i]->path + pliki[i]->name == path + s){
+            cout << "Exist" << endl;
             return true;
+        }
 
     return false;
 }
@@ -239,7 +240,7 @@ int Servo::receive_file(){
         return -1;
     }
     client.receive(np, 100, received); //rozmiar pliku
-    int rozmiar_pliku = chars_to_int(np, received);
+    int rozmiar_pliku = chars_to_int(np);
     fstream pliczek;
     pliczek.open(path + nazwa_pliku, ios_base::out);
     if(!pliczek.is_open()){
@@ -248,7 +249,8 @@ int Servo::receive_file(){
     }
     char dane[rozmiar_pliku];
     client.receive(dane, rozmiar_pliku, received);
-    pliczek << dane;
+    pliczek << (string)dane;
+    cout << dane << endl;
     pliczek.close();
     return 0;
 }
@@ -400,6 +402,7 @@ void Servo::wait_for_command(){
         kod_bledu = unlock_file();
         break;
     }
+    cout << comm[0] << endl;
     if(kod_bledu != 0){
         cout << "Something went wrong" << endl;
     }

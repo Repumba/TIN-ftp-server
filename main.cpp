@@ -12,10 +12,17 @@
 
 using namespace std;
 
-int main(){
+int main(int argc, char* argv[]){
 
-    Servo* s = new Servo();
-    Klient* k = new Klient();
+    if(argc == 1){
+        Servo* s = new Servo(20000);
+        while(true){
+            s->wait_for_command();
+        }
+    } else {
+        Klient* k = new Klient("192.168.1.240", 20000);
+        k->wait_for_instruction();
+    }
     cout << "Hello World!" << endl;
 
     return 0;
