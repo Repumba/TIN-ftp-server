@@ -19,5 +19,18 @@ Na potrzeby projektu postawiłem własny serwer ftp na RaspberryPi. Dane serwera
 
 W celu zalogowania się konieczne są login oraz hasło (utworzenie danych logowania możliwe poprzez kontakt z administratorem).
 
+## Poruszanie się po serwerze
+
+#### Dostepne polecenia:
+* `a` - wyswietl zawartosc folderu
+* `b` - pobranie pliku z serwera
+* `c` - wyslanie pliku na serwer
+* `d` - usuniecie pliku
+* `e` - utworzenie folderu
+* `f` - zmienienie aktualnego folderu
+* `g` - zablokowanie pliku
+* `h` - odblokowanie pliku
+* `x` - zakoncz polaczenie
+
 ## Instalacja SFML:
 https://www.sfml-dev.org/tutorials/2.5/
