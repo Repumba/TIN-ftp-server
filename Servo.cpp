@@ -110,7 +110,7 @@ void Servo::update_fs(){
         new_file->isDir = new_file->name.find(".") == string::npos ? true : false;
         pliki.push_back(new_file);
         int len = userName.size();
-        if(new_file->name.substr(0,len-1) == userName){
+        if(new_file->path.substr(0,len) == userName){
             struct stat sb;
             stat(make_windows_path(s).c_str(), &sb);
             files_size += sb.st_size;
@@ -121,7 +121,7 @@ void Servo::update_fs(){
     currentSize = files_size;
     return;
 #else
-    system("ls -1Rp > temp.txt");
+    system("ls -1R > temp.txt");
 
     fstream f;
     f.open("temp.txt", ios::in);
@@ -139,13 +139,15 @@ void Servo::update_fs(){
         MyFile* nowy_plik = new MyFile;
         nowy_plik->name = s;
         nowy_plik->path = sciezka;
-        nowy_plik->isDir = s.find(".") == string::npos ? true : false;
+        nowy_plik->isDir = s.find('.') == string::npos ? true : false;
         nowy_plik->mask = 0;
         pliki.push_back(nowy_plik);
         int len = userName.size();
-        if(nowy_plik->name.substr(0,len-1) == userName){
+        if(!nowy_plik->isDir && nowy_plik->path.substr(0,len) == userName){
             struct stat sb;
-            stat(s.c_str(), &sb);
+	    s = path + s;
+            if(stat(s.c_str(), &sb) == -1)
+		continue;
             files_size += sb.st_size;
         }
     }
