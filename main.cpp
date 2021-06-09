@@ -12,7 +12,7 @@
 
 using namespace std;
 
-/*long long hash_pass(string pas){
+/* long long hash_pass(string pas){
     long long p = 997;
     long long mod = 1e9+7;
     if(pas.size() <= 0)
@@ -45,8 +45,8 @@ char* int_to_chars(int val){
 }
 
 int main(){
-    //cout << hash_pass("nice");
-    //return 0;
+//    cout << hash_pass("penis");
+//    return 0;
 
     int choice = -1;
     cout << "Do you want to be: \n0 - Server \n1 - Client \nIf you want to exit type anything else" << endl;

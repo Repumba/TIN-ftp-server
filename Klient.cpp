@@ -101,11 +101,10 @@ int Klient::ask_ls(){
     if(server.receive(output, 1000, received) != sf::Socket::Done){
         return 1;
     }
-    if(received > 0){
-        string s = output;
-        cout << s;
-    } else {
+    if(output[0] == '\0'){
         cout << "Nothing to show\n";
+    } else {
+        cout << output;
     }
     return 0;
 }
@@ -233,6 +232,7 @@ void Klient::error_handler(int err_code){
         if(err_code == 0)
             err_code = (int)server_error_code[0];
 
+    cout << "e:" << err_code << endl;
     switch(err_code){
     case 1:
         cout << "Connection error with server " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;

@@ -340,7 +340,7 @@ int Servo::change_directory(){
         for(unsigned int i=0; i<path.size(); ++i)
             if(path[i] == '/')
                 ++zaglebienie;
-        if(zaglebienie < 1) //nie da sie bardziej cofnac
+        if(zaglebienie < 2) //nie da sie bardziej cofnac
             return 7;
         int w = path.size()-1;
         path[w--] = '\0';

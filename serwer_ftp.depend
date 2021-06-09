@@ -29,7 +29,7 @@
 1623037341 c:\users\goscu\desktop\serwer_ftp\myfile.h
 	<string>
 
-1623213041 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\main.cpp
+1623213941 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\main.cpp
 	<iostream>
 	<map>
 	<fstream>
@@ -57,10 +57,10 @@
 1623152726 c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\myfile.h
 	<string>
 
-1623212889 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\klient.cpp
+1623214209 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\klient.cpp
 	"Klient.h"
 
-1623213020 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\servo.cpp
+1623213434 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\servo.cpp
 	"Servo.h"
 	<string>
 	<windows.h>
