@@ -7,6 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include "SFML/Network.hpp"
 #include "myFile.h"
 
@@ -18,6 +21,9 @@ private:
     std::vector<MyFile*> pliki;
     long long mod = 1e9+7;
     long long p = 997;
+    int max_size=1000000;
+    int currentSize=0;
+    std::string userName;
     sf::TcpListener listener;
     sf::TcpSocket client;
     std::string path="";

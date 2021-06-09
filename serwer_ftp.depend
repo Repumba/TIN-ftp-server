@@ -29,20 +29,22 @@
 1623037341 c:\users\goscu\desktop\serwer_ftp\myfile.h
 	<string>
 
-1623221172 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\main.cpp
+1623246977 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\main.cpp
 	<iostream>
 	<map>
 	<fstream>
 	<string>
 	<vector>
+	<stdint.h>
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
+	<pthread.h>
 	"SFML/Network.hpp"
 	"Servo.h"
 	"Klient.h"
 
-1623220456 c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\servo.h
+1623251366 c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\servo.h
 	<iostream>
 	<map>
 	<fstream>
@@ -52,6 +54,9 @@
 	<stdlib.h>
 	<string.h>
 	<pthread.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<unistd.h>
 	"SFML/Network.hpp"
 	"myFile.h"
 

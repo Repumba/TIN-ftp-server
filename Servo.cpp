@@ -89,6 +89,7 @@ void Servo::update_fs(){
     for(unsigned int i=0; i<pliki.size(); ++i)
         delete pliki[i];
     pliki.clear();
+    int files_size=0;
 
 #ifdef _WIN32
     string system_path = ExePath();
@@ -108,9 +109,16 @@ void Servo::update_fs(){
         new_file->mask = 0;
         new_file->isDir = new_file->name.find(".") == string::npos ? true : false;
         pliki.push_back(new_file);
+        int len = userName.size();
+        if(new_file->name.substr(0,len-1) == userName){
+            struct stat sb;
+            stat(make_windows_path(s).c_str(), &sb);
+            files_size += sb.st_size;
+        }
     }
     f.close();
     system("del temp.txt");
+    currentSize = files_size;
     return;
 #else
     system("ls -1Rp > temp.txt");
@@ -132,10 +140,18 @@ void Servo::update_fs(){
         nowy_plik->name = s;
         nowy_plik->path = sciezka;
         nowy_plik->isDir = s.find(".") == string::npos ? true : false;
+        nowy_plik->mask = 0;
         pliki.push_back(nowy_plik);
+        int len = userName.size();
+        if(nowy_plik->name.substr(0,len-1) == userName){
+            struct stat sb;
+            stat(s.c_str(), &sb);
+            files_size += sb.st_size;
+        }
     }
     f.close();
     system("rm temp.txt");
+    currentSize = files_size;
     return;
 #endif // _WIN32
 }
@@ -153,8 +169,9 @@ int Servo::wait_for_password(){
         }
 
         if(check_password(username, password)){
-            path = username;
-            path += "/";
+            this->path = username;
+            this->path += "/";
+            this->userName = username;
             return 0;
         }else{
             error_handler(2);
@@ -374,7 +391,7 @@ int Servo::lock_file(){
     string nazwa_pliku = np;
     if(client.receive(np, 5, received) != sf::Socket::Done)
         return 1;
-
+//tylko serwer
     if(!exist_file(nazwa_pliku)){
         return 3;
     }
