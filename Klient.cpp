@@ -17,6 +17,8 @@ Klient::Klient(string ip, int portNum){
 
     if(server.connect(ip, chars_to_int(new_port)) != sf::Socket::Done)
         error_handler(1);
+
+    login();
 }
 Klient::~Klient(){
     server.disconnect();
@@ -41,6 +43,7 @@ int Klient::login(){
             return 0;
         cout << "Authentication failed" << endl;
     }
+    exit(0);
 }
 
 int Klient::chars_to_int(char* tab){
@@ -297,6 +300,7 @@ void Klient::wait_for_instruction(){
             kod_bledu = ask_unlock_file();
             break;
         case 'x':
+            send_command('x');
             server.disconnect();
             cout << "Bye!" << endl;
             exit(0);

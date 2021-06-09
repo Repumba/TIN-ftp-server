@@ -486,6 +486,9 @@ void Servo::wait_for_command(){
         case 'h':
             kod_bledu = unlock_file();
             break;
+        case 'x':
+            client.disconnect();
+            exit(0);
         default:
             kod_bledu = -1;
         }
