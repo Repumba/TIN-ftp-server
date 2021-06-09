@@ -120,7 +120,7 @@ void Servo::update_fs(){
     string sciezka, plik, s;
     while(f >> s){
         if(s[0] == '.'){
-            if(sciezka.size() == 2){
+            if(s.size() == 2){
                 sciezka = "";
             } else {
                 sciezka = s.substr(2, s.size()-3);
