@@ -31,8 +31,8 @@ Servo::Servo(int portNum){
 }
 
 Servo::~Servo(){
-    client.disconnect();
-    for(int i=0; i<pliki.size(); ++i)
+    //client.disconnect();
+    for(unsigned int i=0; i<pliki.size(); ++i)
         delete pliki[i];
     pthread_exit(0);
 }
@@ -89,6 +89,7 @@ void Servo::update_fs(){
     for(unsigned int i=0; i<pliki.size(); ++i)
         delete pliki[i];
     pliki.clear();
+    int files_size=0;
 
 #ifdef _WIN32
     string system_path = ExePath();
@@ -108,12 +109,19 @@ void Servo::update_fs(){
         new_file->mask = 0;
         new_file->isDir = new_file->name.find(".") == string::npos ? true : false;
         pliki.push_back(new_file);
+        int len = userName.size();
+        if(new_file->path.substr(0,len) == userName){
+            struct stat sb;
+            stat(make_windows_path(s).c_str(), &sb);
+            files_size += sb.st_size;
+        }
     }
     f.close();
     system("del temp.txt");
+    currentSize = files_size;
     return;
 #else
-    system("ls -1Rp > temp.txt");
+    system("ls -1R > temp.txt");
 
     fstream f;
     f.open("temp.txt", ios::in);
@@ -131,11 +139,21 @@ void Servo::update_fs(){
         MyFile* nowy_plik = new MyFile;
         nowy_plik->name = s;
         nowy_plik->path = sciezka;
-        nowy_plik->isDir = s.find(".") == string::npos ? true : false;
+        nowy_plik->isDir = s.find('.') == string::npos ? true : false;
+        nowy_plik->mask = 0;
         pliki.push_back(nowy_plik);
+        int len = userName.size();
+        if(!nowy_plik->isDir && nowy_plik->path.substr(0,len) == userName){
+            struct stat sb;
+	    s = path + s;
+            if(stat(s.c_str(), &sb) == -1)
+		continue;
+            files_size += sb.st_size;
+        }
     }
     f.close();
     system("rm temp.txt");
+    currentSize = files_size;
     return;
 #endif // _WIN32
 }
@@ -153,8 +171,9 @@ int Servo::wait_for_password(){
         }
 
         if(check_password(username, password)){
-            path = username;
-            path += "/";
+            this->path = username;
+            this->path += "/";
+            this->userName = username;
             return 0;
         }else{
             error_handler(2);
@@ -216,6 +235,15 @@ int Servo::send_file(){
     if(client.receive(np, 100, received) != sf::Socket::Done)
         return 1;
     string nazwa_pliku = np;
+
+    if(nazwa_pliku.find("/") != string::npos || nazwa_pliku.find(".") == string::npos){
+        if(client.send(int_to_chars(nazwa_pliku.size()), 100) != sf::Socket::Done) //send to client the size of the file
+            return 1;
+        if(client.send(nazwa_pliku.c_str(), nazwa_pliku.size()) != sf::Socket::Done) //send the file to the client
+            return 1;
+        return 11;
+    }
+
     fstream pliczek;
     pliczek.open(path+nazwa_pliku, fstream::in);
     if(!pliczek.is_open()){
@@ -257,11 +285,18 @@ int Servo::receive_file(){
 
     int rozmiar_pliku = chars_to_int(np);
     char dane[rozmiar_pliku+1];
+    if(client.receive(dane, rozmiar_pliku, received) != sf::Socket::Done) //wczytanie, zeby sie nie popsulo
+            return 1;
+
+    if(nazwa_pliku.find("/") != string::npos || nazwa_pliku.find(".") == string::npos){
+        return 11;
+    }
 
     if(exist_file(nazwa_pliku)){
-        if(client.receive(dane, rozmiar_pliku, received) != sf::Socket::Done) //wczytanie, zeby sie nie popsulo
-            return 1;
         return 4;
+    }
+    if(currentSize+rozmiar_pliku > maxSize){
+        return 9;
     }
 
     fstream pliczek;
@@ -269,8 +304,6 @@ int Servo::receive_file(){
     if(!pliczek.is_open()){
         return -1;
     }
-    if(client.receive(dane, rozmiar_pliku, received) != sf::Socket::Done)
-        return 1;
     dane[rozmiar_pliku] = '\0';
     pliczek << dane;
     pliczek.close();
@@ -287,6 +320,9 @@ int Servo::delete_file(){
     string nazwa_pliku = np;
     if(!exist_file(nazwa_pliku)){
         return 3;
+    }
+    if(nazwa_pliku.find("/") != string::npos || nazwa_pliku.find(".") == string::npos){
+        return 11;
     }
     string abs_path = path + nazwa_pliku;
     for(unsigned int i=0; i<pliki.size(); ++i){
@@ -322,6 +358,9 @@ int Servo::make_directory(){
     if(exist_file(nazwa_folderu)){
         return 4;
     }
+    if(nazwa_folderu.find("/") != string::npos || nazwa_folderu.find(".") != string::npos){
+        return 11;
+    }
     string abs_path = "mkdir " + path + nazwa_folderu;
 #ifdef _WIN32
     system(make_windows_path(abs_path).c_str());
@@ -351,6 +390,9 @@ int Servo::change_directory(){
             path[w--] = '\0';
         return 0;
     }
+    if(nazwa_folderu.find("/") != string::npos || nazwa_folderu.find(".") != string::npos){
+        return 11;
+    }
     if(!exist_file(nazwa_folderu))
         return 3;
     string abs_path = path + nazwa_folderu;
@@ -374,9 +416,12 @@ int Servo::lock_file(){
     string nazwa_pliku = np;
     if(client.receive(np, 5, received) != sf::Socket::Done)
         return 1;
-
+//tylko serwer
     if(!exist_file(nazwa_pliku)){
         return 3;
+    }
+    if(nazwa_pliku.find("/") != string::npos || nazwa_pliku.find(".") == string::npos){
+        return 11;
     }
 
     char mask = np[0];
@@ -402,6 +447,9 @@ int Servo::unlock_file(){
     if(!exist_file(nazwa_pliku)){
         return 3;
     }
+    if(nazwa_pliku.find("/") != string::npos || nazwa_pliku.find(".") == string::npos){
+        return 11;
+    }
 
     char mask = np[0];
     mask = ~mask;
@@ -426,7 +474,7 @@ void Servo::error_handler(int err_code){
     switch(err_code){
     case 1:
         cout << "Connection error with client " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
-        this->~Servo();
+        pthread_exit(0);
     case 2:
         cout << "Wrong login data " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
         break;
@@ -448,8 +496,14 @@ void Servo::error_handler(int err_code){
     case 8:
         cout << "Tried to open file as a directory " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
         break;
+    case 9:
+        cout << "Tried to exceed memory limit " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
+        break;
     case 10:
         cout << "Undefined behavior " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
+        break;
+    case 11:
+        cout << "Invalid syntax " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
         break;
     }
     return;
