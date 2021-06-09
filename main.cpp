@@ -62,8 +62,8 @@ int main(){
         sf::TcpListener main_listener;
         sf::TcpSocket new_client;
         int port_modif = 0;
+        main_listener.listen(c_port);
         while(port_modif < 100){
-            main_listener.listen(c_port);
             if(main_listener.accept(new_client) != sf::Socket::Done)
                 cout << "Nie udalo sie polaczyc" << endl;
             else{
