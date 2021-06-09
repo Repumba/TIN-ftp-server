@@ -29,9 +29,9 @@ int Klient::login(){
         cin >> username;
         cout << "Password: ";
         cin >> password;
-        if(server.send(username, 100) != sf::Socket::Done)
+        if(server.send(username.c_str(), 100) != sf::Socket::Done)
             return 1;
-        if(server.send(password, 100) != sf::Socket::Done)
+        if(server.send(password.c_str(), 100) != sf::Socket::Done)
             return 1;
         char resp[5];
         size_t received;
