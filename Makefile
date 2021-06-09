@@ -1,2 +1,3 @@
 make:
-	g++ main.cpp Servo.cpp Klient.cpp -o a.exe -I /home/pi/2.1/include
+	g++ -c main.cpp Servo.cpp Klient.cpp -I /home/pi/2.1/include
+	g++ main.o Servo.o Klient.o -o app.e -L /home/pi/2.1/lib -lsfml-system -lsfml-network

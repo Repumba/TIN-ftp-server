@@ -31,5 +31,6 @@ obj/
 
 # Executables
 *.exe
+*.e
 *.out
 *.app
