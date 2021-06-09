@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,7 +26,7 @@ using namespace std;
 }*/
 
 void* init_server(void* porto){
-    Servo* s = new Servo((int)porto);
+    Servo* s = new Servo((intptr_t)porto);
     s->wait_for_command();
     return 0;
 }
