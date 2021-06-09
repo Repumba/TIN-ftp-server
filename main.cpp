@@ -27,6 +27,7 @@ using namespace std;
 void* init_server(void* porto){
     Servo* s = new Servo((int)porto);
     s->wait_for_command();
+    return 0;
 }
 
 char* int_to_chars(int val){
