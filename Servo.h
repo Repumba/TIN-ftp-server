@@ -21,7 +21,7 @@ private:
     std::vector<MyFile*> pliki;
     long long mod = 1e9+7;
     long long p = 997;
-    int max_size=1000000;
+    int maxSize=1000000;
     int currentSize=0;
     std::string userName;
     sf::TcpListener listener;

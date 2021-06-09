@@ -258,6 +258,9 @@ void Klient::error_handler(int err_code){
     case 8:
         cout << "Tried to open file as a directory " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
         break;
+    case 9:
+        cout << "Tried to exceed memory limit " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
+        break;
     case 10:
         cout << "Undefined behavior " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
         break;

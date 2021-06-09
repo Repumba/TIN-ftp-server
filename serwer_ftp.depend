@@ -44,7 +44,7 @@
 	"Servo.h"
 	"Klient.h"
 
-1623251366 c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\servo.h
+1623260742 c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\servo.h
 	<iostream>
 	<map>
 	<fstream>
@@ -63,22 +63,25 @@
 1623152726 c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\myfile.h
 	<string>
 
-1623214597 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\klient.cpp
+1623263233 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\klient.cpp
 	"Klient.h"
 
-1623221181 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\servo.cpp
+1623263063 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\servo.cpp
 	"Servo.h"
 	<string>
 	<windows.h>
 	<iostream>
 
-1623211560 c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\klient.h
+1623263229 c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\klient.h
 	<iostream>
 	<fstream>
 	<string>
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
+	<signal.h>
+	<unistd.h>
+	<cstdlib>
 	"SFML/Network.hpp"
 
 1623156374 source:c:\cygwin64\home\goscu\serwer_ftp\tin-ftp-server\main.cpp

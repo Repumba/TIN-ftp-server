@@ -31,8 +31,8 @@ Servo::Servo(int portNum){
 }
 
 Servo::~Servo(){
-    client.disconnect();
-    for(int i=0; i<pliki.size(); ++i)
+    //client.disconnect();
+    for(unsigned int i=0; i<pliki.size(); ++i)
         delete pliki[i];
     pthread_exit(0);
 }
@@ -235,6 +235,15 @@ int Servo::send_file(){
     if(client.receive(np, 100, received) != sf::Socket::Done)
         return 1;
     string nazwa_pliku = np;
+
+    if(nazwa_pliku.find("/") != string::npos || nazwa_pliku.find(".") == string::npos){
+        if(client.send(int_to_chars(nazwa_pliku.size()), 100) != sf::Socket::Done) //send to client the size of the file
+            return 1;
+        if(client.send(nazwa_pliku.c_str(), 3) != sf::Socket::Done) //send the file to the client
+            return 1;
+        return 11;
+    }
+
     fstream pliczek;
     pliczek.open(path+nazwa_pliku, fstream::in);
     if(!pliczek.is_open()){
@@ -276,11 +285,18 @@ int Servo::receive_file(){
 
     int rozmiar_pliku = chars_to_int(np);
     char dane[rozmiar_pliku+1];
+    if(client.receive(dane, rozmiar_pliku, received) != sf::Socket::Done) //wczytanie, zeby sie nie popsulo
+            return 1;
+
+    if(nazwa_pliku.find("/") != string::npos || nazwa_pliku.find(".") == string::npos){
+        return 11;
+    }
 
     if(exist_file(nazwa_pliku)){
-        if(client.receive(dane, rozmiar_pliku, received) != sf::Socket::Done) //wczytanie, zeby sie nie popsulo
-            return 1;
         return 4;
+    }
+    if(currentSize+rozmiar_pliku > maxSize){
+        return 9;
     }
 
     fstream pliczek;
@@ -288,8 +304,6 @@ int Servo::receive_file(){
     if(!pliczek.is_open()){
         return -1;
     }
-    if(client.receive(dane, rozmiar_pliku, received) != sf::Socket::Done)
-        return 1;
     dane[rozmiar_pliku] = '\0';
     pliczek << dane;
     pliczek.close();
@@ -306,6 +320,9 @@ int Servo::delete_file(){
     string nazwa_pliku = np;
     if(!exist_file(nazwa_pliku)){
         return 3;
+    }
+    if(nazwa_pliku.find("/") != string::npos || nazwa_pliku.find(".") == string::npos){
+        return 11;
     }
     string abs_path = path + nazwa_pliku;
     for(unsigned int i=0; i<pliki.size(); ++i){
@@ -341,6 +358,9 @@ int Servo::make_directory(){
     if(exist_file(nazwa_folderu)){
         return 4;
     }
+    if(nazwa_folderu.find("/") != string::npos || nazwa_folderu.find(".") != string::npos){
+        return 11;
+    }
     string abs_path = "mkdir " + path + nazwa_folderu;
 #ifdef _WIN32
     system(make_windows_path(abs_path).c_str());
@@ -370,6 +390,9 @@ int Servo::change_directory(){
             path[w--] = '\0';
         return 0;
     }
+    if(nazwa_folderu.find("/") != string::npos || nazwa_folderu.find(".") != string::npos){
+        return 11;
+    }
     if(!exist_file(nazwa_folderu))
         return 3;
     string abs_path = path + nazwa_folderu;
@@ -397,6 +420,9 @@ int Servo::lock_file(){
     if(!exist_file(nazwa_pliku)){
         return 3;
     }
+    if(nazwa_pliku.find("/") != string::npos || nazwa_pliku.find(".") == string::npos){
+        return 11;
+    }
 
     char mask = np[0];
     string abs_path = path + nazwa_pliku;
@@ -420,6 +446,9 @@ int Servo::unlock_file(){
 
     if(!exist_file(nazwa_pliku)){
         return 3;
+    }
+    if(nazwa_pliku.find("/") != string::npos || nazwa_pliku.find(".") == string::npos){
+        return 11;
     }
 
     char mask = np[0];
@@ -467,8 +496,14 @@ void Servo::error_handler(int err_code){
     case 8:
         cout << "Tried to open file as a directory " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
         break;
+    case 9:
+        cout << "Tried to exceed memory limit " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
+        break;
     case 10:
         cout << "Undefined behavior " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
+        break;
+    case 11:
+        cout << "Invalid syntax " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
         break;
     }
     return;
