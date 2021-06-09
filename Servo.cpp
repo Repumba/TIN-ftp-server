@@ -239,7 +239,7 @@ int Servo::send_file(){
     if(nazwa_pliku.find("/") != string::npos || nazwa_pliku.find(".") == string::npos){
         if(client.send(int_to_chars(nazwa_pliku.size()), 100) != sf::Socket::Done) //send to client the size of the file
             return 1;
-        if(client.send(nazwa_pliku.c_str(), 3) != sf::Socket::Done) //send the file to the client
+        if(client.send(nazwa_pliku.c_str(), nazwa_pliku.size()) != sf::Socket::Done) //send the file to the client
             return 1;
         return 11;
     }
