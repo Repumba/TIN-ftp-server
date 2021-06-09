@@ -22,15 +22,15 @@ W celu zalogowania się konieczne są login oraz hasło (utworzenie danych logow
 ## Poruszanie się po serwerze
 
 #### Dostepne polecenia:
-* `a` - wyswietl zawartosc folderu
+* `a` - wyświetl zawartość folderu
 * `b` - pobranie pliku z serwera
-* `c` - wyslanie pliku na serwer
-* `d` - usuniecie pliku
+* `c` - wysłanie pliku na serwer
+* `d` - usunięcie pliku
 * `e` - utworzenie folderu
 * `f` - zmienienie aktualnego folderu
 * `g` - zablokowanie pliku
 * `h` - odblokowanie pliku
-* `x` - zakoncz polaczenie
+* `x` - zakończ połączenie
 
 ## Instalacja SFML:
 https://www.sfml-dev.org/tutorials/2.5/
