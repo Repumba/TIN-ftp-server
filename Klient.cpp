@@ -289,7 +289,7 @@ void Klient::wait_for_instruction(){
             cout << "e - utworzenie folderu\n";
             cout << "f - zmienienie aktualnego folderu\n";
             cout << "g - zablokowanie pliku\n";
-            cout << "h - odblokowanie pliku\n"
+            cout << "h - odblokowanie pliku\n";
             cout << "x - zakoncz polaczenie" << endl; //tutaj endl, aby wymusic oproznienie bufora
         }
 

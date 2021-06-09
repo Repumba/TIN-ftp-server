@@ -50,7 +50,7 @@ int main(){
         int port_modif = 0;
         while(port_modif < 100){
             main_listener.listen(c_port);
-            if(listener.accept(new_client) != sf::Socket::Done)
+            if(main_listener.accept(new_client) != sf::Socket::Done)
                 cout << "Nie udalo sie polaczyc" << endl;
             else{
                 ++port_modif;
@@ -58,7 +58,7 @@ int main(){
                     continue;
                 new_client.disconnect();
                 //nowy watek
-                init_server(c_port+active_connections+1);
+                init_server(c_port+port_modif);
             }
         }
     } else {
