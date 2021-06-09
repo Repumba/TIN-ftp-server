@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 #include "SFML/Network.hpp"
 #include "Servo.h"
 #include "Klient.h"
@@ -23,8 +24,8 @@ using namespace std;
     return val;
 }*/
 
-void init_server(int porto){
-    Servo* s = new Servo(porto);
+void* init_server(void* porto){
+    Servo* s = new Servo((int)porto);
     s->wait_for_command();
 }
 
@@ -72,7 +73,9 @@ int main(){
                     continue;
                 new_client.disconnect();
                 //nowy watek
-                init_server(c_port+port_modif);
+                pthread_t nowy_proces;
+                pthread_create(&nowy_proces, NULL, init_server, (void*)(c_port+port_modif));
+                pthread_join(nowy_proces, NULL);
             }
         }
         main_listener.close();

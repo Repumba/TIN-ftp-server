@@ -24,7 +24,7 @@ Servo::Servo(int portNum){
     listener.listen(portNum);
     if(listener.accept(client) != sf::Socket::Done){
         cout << "Nie udalo sie polaczyc" << endl;
-        exit(1);
+        pthread_exit(0);
     }
     error_handler(wait_for_password());
     this->update_fs();
@@ -32,6 +32,9 @@ Servo::Servo(int portNum){
 
 Servo::~Servo(){
     client.disconnect();
+    for(int i=0; i<pliki.size(); ++i)
+        delete pliki[i];
+    pthread_exit(0);
 }
 
 string Servo::make_windows_path(string s){
@@ -423,8 +426,7 @@ void Servo::error_handler(int err_code){
     switch(err_code){
     case 1:
         cout << "Connection error with client " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
-        client.disconnect();
-        exit(1);
+        this->~Servo();
     case 2:
         cout << "Wrong login data " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
         break;
