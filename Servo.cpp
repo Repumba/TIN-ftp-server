@@ -488,6 +488,7 @@ void Servo::wait_for_command(){
             break;
         case 'x':
             client.disconnect();
+            listener.close();
             exit(0);
         default:
             kod_bledu = -1;

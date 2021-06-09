@@ -316,6 +316,7 @@ void Klient::wait_for_instruction(){
             cout << "g - zablokowanie pliku\n";
             cout << "h - odblokowanie pliku\n";
             cout << "x - zakoncz polaczenie" << endl; //tutaj endl, aby wymusic oproznienie bufora
+            continue;
         }
 
         error_handler(kod_bledu);

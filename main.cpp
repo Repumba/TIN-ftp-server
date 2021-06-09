@@ -75,6 +75,7 @@ int main(){
                 init_server(c_port+port_modif);
             }
         }
+        main_listener.close();
     } else {
         string c_ip;
         int c_port;
