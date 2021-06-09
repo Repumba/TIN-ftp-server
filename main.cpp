@@ -50,7 +50,7 @@ int main(){
 //    return 0;
 
     int choice = -1;
-    cout << "Do you want to be: \n0 - Server \n1 - Client \nIf you want to exit type anything else" << endl;
+    cout << "Do you want to be: \n0 - Server \n1 - Client \nIf you want to exit, type anything else" << endl;
     cin >> choice;
     if(choice != 0 && choice != 1){
         cout << "Bye!" << endl;
@@ -77,8 +77,8 @@ int main(){
                 pthread_create(&nowy_proces, NULL, init_server, (void*)(c_port+port_modif));
                 pthread_join(nowy_proces, NULL);
             }
+            main_listener.close();
         }
-        main_listener.close();
     } else {
         string c_ip;
         int c_port;
