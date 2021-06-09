@@ -1,6 +1,8 @@
+SFMLpath = /home/pi/2.1
+
 make:
-	g++ -c main.cpp Servo.cpp Klient.cpp -I /home/pi/2.1/include
-	g++ main.o Servo.o Klient.o -o app.e -L /home/pi/2.1/lib -lsfml-system -lsfml-network
+	g++ -c main.cpp Servo.cpp Klient.cpp -I $(SFMLpath)/include
+	g++ main.o Servo.o Klient.o -o app.e -L $(SFMLpath)/lib -lsfml-system -lsfml-network
 
 launch:
-	export LD_LIBRARY_PATH=/home/pi/2.1/lib && ./app.e
+	export LD_LIBRARY_PATH=$(SFMLpath)/lib && ./app.e
