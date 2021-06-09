@@ -61,11 +61,12 @@ int main(){
         int c_port = 20000;
 //        cout << "Specify main port: ";
 //        cin >> c_port;
-        sf::TcpListener main_listener;
         sf::TcpSocket new_client;
         int port_modif = 0;
-        main_listener.listen(c_port);
         while(port_modif < 100){
+            sf::TcpListener main_listener;
+            main_listener.listen(c_port);
+
             if(main_listener.accept(new_client) != sf::Socket::Done)
                 cout << "Nie udalo sie polaczyc" << endl;
             else{
@@ -76,8 +77,8 @@ int main(){
                 //nowy watek
                 pthread_t nowy_proces;
                 pthread_create(&nowy_proces, NULL, init_server, (void*)(c_port+port_modif));
-                pthread_join(nowy_proces, NULL);
             }
+cout << "i am here" << endl;
             main_listener.close();
         }
     } else {
