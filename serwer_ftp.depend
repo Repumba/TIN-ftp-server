@@ -66,7 +66,7 @@
 1623264013 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\klient.cpp
 	"Klient.h"
 
-1623263872 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\servo.cpp
+1623264245 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\servo.cpp
 	"Servo.h"
 	<string>
 	<windows.h>

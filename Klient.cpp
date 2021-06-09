@@ -236,7 +236,7 @@ void Klient::error_handler(int err_code){
     case 1:
         cout << "Connection error with server " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
         server.disconnect();
-        exit(1);
+        exit(0);
     case 2:
         cout << "Wrong login data " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
         break;

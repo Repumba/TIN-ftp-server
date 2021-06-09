@@ -474,7 +474,7 @@ void Servo::error_handler(int err_code){
     switch(err_code){
     case 1:
         cout << "Connection error with client " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
-        this->~Servo();
+        pthread_exit(0);
     case 2:
         cout << "Wrong login data " << client.getRemoteAddress() << " on port: " << client.getLocalPort() << endl;
         break;
