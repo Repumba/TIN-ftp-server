@@ -17,11 +17,7 @@ string ExePath() {
 
 
 Servo::Servo(){
-    cout << "Servo:\n";
-    this->update_fs();
-    for(unsigned int i=0; i<pliki.size(); ++i){
-        cout << pliki[i]->path << " " << pliki[i]->name << endl;
-    }
+
 }
 
 Servo::Servo(int portNum){
@@ -30,6 +26,7 @@ Servo::Servo(int portNum){
         cout << "Nie udalo sie polaczyc" << endl;
         exit(1);
     }
+    error_handler(wait_for_password());
     this->update_fs();
 }
 
@@ -141,23 +138,26 @@ void Servo::update_fs(){
 }
 
 int Servo::wait_for_password(){
-    char username[100];
-    char password[100];
-    size_t received;
-    if(client.receive(username, 100, received) != sf::Socket::Done){
-        return 1;
-    }
-    if(client.receive(password, 100, received) != sf::Socket::Done){
-        return 1;
-    }
+    for(int i=0; i<3; ++i){
+        char username[100];
+        char password[100];
+        size_t received;
+        if(client.receive(username, 100, received) != sf::Socket::Done){
+            return 1;
+        }
+        if(client.receive(password, 100, received) != sf::Socket::Done){
+            return 1;
+        }
 
-    if(check_password(username, password)){
-        path = username;
-        path += "/";
-    }else{
-        return 2;
+        if(check_password(username, password)){
+            path = username;
+            path += "/";
+            return 0;
+        }else{
+            error_handler(2);
+        }
     }
-    return 0;
+    return 2;
 }
 
 bool Servo::check_password(string u, string p){

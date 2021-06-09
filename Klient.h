@@ -21,6 +21,7 @@ private:
     int ask_change_directory();
     int ask_lock_file();
     int ask_unlock_file();
+    int login();
 
     int chars_to_int(char*);
     int send_command(char);

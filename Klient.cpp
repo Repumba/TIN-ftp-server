@@ -22,6 +22,27 @@ Klient::~Klient(){
     server.disconnect();
 }
 
+int Klient::login(){
+    for(int i=0; i<3; ++i){
+        string username, password;
+        cout << "Username: ";
+        cin >> username;
+        cout << "Password: ";
+        cin >> password;
+        if(server.send(username, 100) != sf::Socket::Done)
+            return 1;
+        if(server.send(password, 100) != sf::Socket::Done)
+            return 1;
+        char resp[5];
+        size_t received;
+        if(server.receive(resp, 5, received) != sf::Socket::Done)
+            return 1;
+        if((int)resp[0] == 0)
+            return 0;
+        cout << "Authentication failed" << endl;
+    }
+}
+
 int Klient::chars_to_int(char* tab){
     string s = tab;
     int ret = 0;

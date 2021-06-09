@@ -57,10 +57,10 @@
 1623152726 c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\myfile.h
 	<string>
 
-1623197860 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\klient.cpp
+1623210797 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\klient.cpp
 	"Klient.h"
 
-1623197956 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\servo.cpp
+1623211166 source:c:\users\goscu\desktop\serwer_ftp\tin-ftp-server\servo.cpp
 	"Servo.h"
 	<string>
 	<windows.h>
