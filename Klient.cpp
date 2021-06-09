@@ -162,7 +162,6 @@ int Klient::ask_receive_file(){
     while(!pliczek.eof()){
         pliczek.get(plik[i++]);
     }
-    cout << (string)plik << endl;
     if(server.send(plik, size_of_file) != sf::Socket::Done)
         return 1;
     return 0;

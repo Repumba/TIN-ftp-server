@@ -270,7 +270,6 @@ int Servo::receive_file(){
         return 1;
     dane[rozmiar_pliku] = '\0';
     pliczek << dane;
-    cout << dane << endl;
     pliczek.close();
 
     this->update_fs();
@@ -489,7 +488,7 @@ void Servo::wait_for_command(){
         case 'x':
             client.disconnect();
             listener.close();
-            exit(0);
+            return;
         default:
             kod_bledu = -1;
         }
