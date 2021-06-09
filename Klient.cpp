@@ -264,6 +264,9 @@ void Klient::error_handler(int err_code){
     case 10:
         cout << "Undefined behavior " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
         break;
+    case 11:
+        cout << "Invalid syntax " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
+        break;
     }
     return;
 }
