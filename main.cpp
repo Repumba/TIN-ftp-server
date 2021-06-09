@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 #include "SFML/Network.hpp"
 #include "Servo.h"
 #include "Klient.h"
@@ -23,9 +24,10 @@ using namespace std;
     return val;
 }*/
 
-void init_server(int porto){
-    Servo* s = new Servo(porto);
+void* init_server(void* porto){
+    Servo* s = new Servo((int)porto);
     s->wait_for_command();
+    return 0;
 }
 
 char* int_to_chars(int val){
@@ -49,7 +51,7 @@ int main(){
 //    return 0;
 
     int choice = -1;
-    cout << "Do you want to be: \n0 - Server \n1 - Client \nIf you want to exit type anything else" << endl;
+    cout << "Do you want to be: \n0 - Server \n1 - Client \nIf you want to exit, type anything else" << endl;
     cin >> choice;
     if(choice != 0 && choice != 1){
         cout << "Bye!" << endl;
@@ -59,11 +61,13 @@ int main(){
         int c_port = 20000;
 //        cout << "Specify main port: ";
 //        cin >> c_port;
-        sf::TcpListener main_listener;
         sf::TcpSocket new_client;
         int port_modif = 0;
+        sf::TcpListener main_listener;
         main_listener.listen(c_port);
+
         while(port_modif < 100){
+
             if(main_listener.accept(new_client) != sf::Socket::Done)
                 cout << "Nie udalo sie polaczyc" << endl;
             else{
@@ -72,10 +76,10 @@ int main(){
                     continue;
                 new_client.disconnect();
                 //nowy watek
-                init_server(c_port+port_modif);
+                pthread_t nowy_proces;
+                pthread_create(&nowy_proces, NULL, init_server, (void*)(c_port+port_modif));
             }
         }
-        main_listener.close();
     } else {
         string c_ip;
         int c_port;
