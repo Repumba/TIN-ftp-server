@@ -232,7 +232,6 @@ void Klient::error_handler(int err_code){
         if(err_code == 0)
             err_code = (int)server_error_code[0];
 
-    cout << "e:" << err_code << endl;
     switch(err_code){
     case 1:
         cout << "Connection error with server " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;

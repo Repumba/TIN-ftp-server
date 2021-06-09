@@ -348,6 +348,8 @@ int Servo::change_directory(){
             path[w--] = '\0';
         return 0;
     }
+    if(!exist_file(nazwa_folderu))
+        return 3;
     string abs_path = path + nazwa_folderu;
     for(unsigned int i=0; i<pliki.size(); ++i){
         if(pliki[i]->path + pliki[i]->name == abs_path){
