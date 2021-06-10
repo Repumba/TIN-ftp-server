@@ -21,6 +21,8 @@ private:
     sf::TcpListener listener;
     sf::TcpSocket client;
     std::string path="";
+    std::string maskfile = "access.masks";
+    std::string maskfile_lock = ".lock";
 
     long long hash_password(std::string);
     void update_fs();
@@ -36,6 +38,15 @@ private:
     int lock_file();
     int unlock_file();
     bool exist_file(std::string);
+    void create_maskfile();
+    void lock_maskfile();
+    void unlock_maskfile();
+    void delete_maskfile();
+    bool check_maskfile_lock();
+    void maskfile_append();
+    void check_mask();
+    void set_mask();
+    void unset_mask();
 
     int chars_to_int(char*);
     char* int_to_chars(int);

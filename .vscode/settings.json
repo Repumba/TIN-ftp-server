@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.jsonl": "json",
+        "iostream": "c",
+        "fstream": "cpp",
+        "typeinfo": "cpp"
+    }
+}
