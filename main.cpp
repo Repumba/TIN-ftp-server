@@ -1,4 +1,7 @@
 #include <iostream>
+#include <cstdlib>
+#include <signal.h>
+#include <unistd.h>
 #include <map>
 #include <fstream>
 #include <string>
@@ -24,6 +27,14 @@ using namespace std;
         val = (val*p + pas[i]) % mod;
     return val;
 }*/
+
+sf::TcpListener main_listener;
+
+void signal_callback_handler(int signum){
+    main_listener.close();
+    cout << "Server closed" << endl;
+    exit(signum);
+}
 
 void* init_server(void* porto){
     Servo* s = new Servo((intptr_t)porto);
@@ -60,9 +71,9 @@ int main(){
         int c_port = 20000;
 //        cout << "Specify main port: ";
 //        cin >> c_port;
+	signal(SIGINT, signal_callback_handler);
         sf::TcpSocket new_client;
         int port_modif = 0;
-        sf::TcpListener main_listener;
         main_listener.listen(c_port);
 
         while(port_modif < 100){
