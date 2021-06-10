@@ -193,7 +193,7 @@ bool Servo::check_password(string user, string passwd){
 
         if (user == read_user){
 
-            string hash = sha256(passwd + read_salt);
+            string hash = sha256(read_salt + passwd);
             if (hash == read_hash){
                 f.close();
                 return true;
