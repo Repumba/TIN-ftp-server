@@ -1,6 +1,5 @@
 bin/
 obj/
-*.txt
 
 # Prerequisites
 *.d
