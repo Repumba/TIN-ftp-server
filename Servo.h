@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "SFML/Network.hpp"
+#include "sha256.h"
 #include "myFile.h"
 
 #ifndef SERVO_H
@@ -28,7 +29,7 @@ private:
     sf::TcpSocket client;
     std::string path="";
 
-    long long hash_password(std::string);
+    std::string hash_password(std::string);
     void update_fs();
     void change_mask(std::string, int);
     int wait_for_password();

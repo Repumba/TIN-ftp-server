@@ -5,6 +5,7 @@ using namespace std;
 #include <string>
 #include <windows.h>
 #include <iostream>
+#include "sha256.h"
 
 string ExePath() {
     char buffer[MAX_PATH] = { 0 };
@@ -76,13 +77,8 @@ char* Servo::int_to_chars(int val){
     return output;
 }
 
-long long Servo::hash_password(string pas){
-    if(pas.size() <= 0)
-        return -1;
-    long long val = pas[0];
-    for(unsigned int i=1; i<pas.size(); ++i)
-        val = (val*p + pas[i]) % mod;
-    return val;
+string Servo::hash_password(string pas){
+    return sha256(pas);
 }
 
 void Servo::update_fs(){
@@ -182,22 +178,31 @@ int Servo::wait_for_password(){
     return 2;
 }
 
-bool Servo::check_password(string u, string p){
-    long long h = hash_password(p);
+bool Servo::check_password(string user, string passwd){
+
     fstream f;
     f.open("passwd.txt", ios::in);
     if(!f.is_open()){
         cout << "Error no passwd file" << endl;
         exit(1);
     }
-    string wu;
-    long long wh;
-    while(f >> wu >> wh){
-        if(!wu.compare(u))
-            if(h == wh){
+    string read_user;
+    string read_hash;
+    string read_salt;
+    while(f >> read_user >> read_hash >> read_salt){
+
+        if (user == read_user){
+
+            string hash = sha256(passwd + read_salt);
+            if (hash == read_hash){
                 f.close();
                 return true;
             }
+            else{
+                break;
+            }
+
+        }
     }
     f.close();
     return false;

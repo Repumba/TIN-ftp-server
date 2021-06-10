@@ -48,8 +48,6 @@ char* int_to_chars(int val){
 }
 
 int main(){
-//    cout << hash_pass("penis");
-//    return 0;
 
     int choice = -1;
     cout << "Do you want to be: \n0 - Server \n1 - Client \nIf you want to exit, type anything else" << endl;
