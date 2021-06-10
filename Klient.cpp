@@ -236,7 +236,7 @@ void Klient::error_handler(int err_code){
     case 1:
         cout << "Connection error with server " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
         server.disconnect();
-        exit(0);
+        exit(1);
     case 2:
         cout << "Wrong login data " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
         break;
@@ -258,14 +258,8 @@ void Klient::error_handler(int err_code){
     case 8:
         cout << "Tried to open file as a directory " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
         break;
-    case 9:
-        cout << "Tried to exceed memory limit " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
-        break;
     case 10:
         cout << "Undefined behavior " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
-        break;
-    case 11:
-        cout << "Invalid syntax " << server.getRemoteAddress() << " on port: " << server.getLocalPort() << endl;
         break;
     }
     return;

@@ -4,9 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
-#include <unistd.h>
-#include <cstdlib>
 #include "SFML/Network.hpp"
 
 #ifndef KLIENT_H
