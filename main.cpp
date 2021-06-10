@@ -1,4 +1,7 @@
 #include <iostream>
+#include <cstdlib>
+#include <signal.h>
+#include <unistd.h>
 #include <map>
 #include <fstream>
 #include <string>
@@ -25,6 +28,14 @@ using namespace std;
     return val;
 }*/
 
+sf::TcpListener main_listener;
+
+void signal_callback_handler(int signum){
+    main_listener.close();
+    cout << "Server closed" << endl;
+    exit(signum);
+}
+
 void* init_server(void* porto){
     Servo* s = new Servo((intptr_t)porto);
     s->wait_for_command();
@@ -48,8 +59,6 @@ char* int_to_chars(int val){
 }
 
 int main(){
-//    cout << hash_pass("penis");
-//    return 0;
 
     int choice = -1;
     cout << "Do you want to be: \n0 - Server \n1 - Client \nIf you want to exit, type anything else" << endl;
@@ -62,9 +71,9 @@ int main(){
         int c_port = 20000;
 //        cout << "Specify main port: ";
 //        cin >> c_port;
+	signal(SIGINT, signal_callback_handler);
         sf::TcpSocket new_client;
         int port_modif = 0;
-        sf::TcpListener main_listener;
         main_listener.listen(c_port);
 
         while(port_modif < 100){
