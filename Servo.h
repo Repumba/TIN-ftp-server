@@ -46,12 +46,10 @@ private:
     int unlock_file();
     bool exist_file(std::string);
 
-    void create_maskfile();
     void lock_maskfile();
     void unlock_maskfile();
     void delete_maskfile();
     bool check_maskfile_lock();
-    void maskfile_append(std::string);
     char check_mask(std::string);
     void set_mask(std::string, char);
     void unset_mask(std::string, char);

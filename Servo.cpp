@@ -27,8 +27,7 @@ Servo::Servo(int portNum){
         pthread_exit(0);
     }
     error_handler(wait_for_password());
-    create_maskfile();
-    this->update_fs();
+   this->update_fs();
 }
 
 Servo::~Servo(){
@@ -88,11 +87,6 @@ string Servo::hash_password(string pas){
     return val;*/
 }
 
-void Servo::create_maskfile(){
-    //string temp = "echo . > " + (string)maskfile;
-    //system(temp.c_str());
-}
-
 void Servo::lock_maskfile(){
     while(!check_maskfile_lock()){
         string command = "echo . > " + maskfile + maskfile_lock;
@@ -125,12 +119,6 @@ void Servo::delete_maskfile(){
 bool Servo::check_maskfile_lock(){
     ifstream f(maskfile + maskfile_lock);
     return f.good();
-}
-
-void Servo::maskfile_append(string filepath){
-    //char mask = '0';
-    //string temp = "echo " + filepath + mask + " >> " + (string)maskfile;
-    //system(temp.c_str());
 }
 
 char Servo::check_mask(string filepath){
@@ -214,7 +202,6 @@ void Servo::unset_mask(string filepath, char mask){
 
 void Servo::update_fs(){
     lock_maskfile();
-    create_maskfile();
     for(unsigned int i=0; i<pliki.size(); ++i)
         delete pliki[i];
     int files_size = 0;
@@ -236,7 +223,6 @@ void Servo::update_fs(){
         new_file->path = s.substr(0,pos);
         new_file->name = s.substr(pos, s.size());
         new_file->isDir = new_file->name.find(".") == string::npos ? true : false;
-        maskfile_append(new_file->path + new_file->name);
         pliki.push_back(new_file);
         int len = userName.size();
         if(new_file->path.substr(0,len) == userName){
