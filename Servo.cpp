@@ -410,6 +410,7 @@ int Servo::receive_file(){
 
     int rozmiar_pliku = chars_to_int(np);
     char dane[rozmiar_pliku+1];
+cout << rozmiar_pliku << " " << nazwa_pliku << endl;
 
     if(client.receive(dane, rozmiar_pliku, received) != sf::Socket::Done) //wczytanie, zeby sie nie popsulo
         return 1;
@@ -421,11 +422,11 @@ int Servo::receive_file(){
         return 9;
 
     fstream pliczek;
-    set_mask(path+nazwa_pliku, 1);
     pliczek.open(path+nazwa_pliku, fstream::out);
     if(!pliczek.is_open()){
         return -1;
     }
+    set_mask(path+nazwa_pliku, 1);
     dane[rozmiar_pliku] = '\0';
     pliczek << dane;
     pliczek.close();
