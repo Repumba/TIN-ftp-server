@@ -128,9 +128,9 @@ bool Servo::check_maskfile_lock(){
 }
 
 void Servo::maskfile_append(string filepath){
-    char mask = '0';
-    string temp = "echo " + filepath + mask + " >> " + (string)maskfile;
-    system(temp.c_str());
+    //char mask = '0';
+    //string temp = "echo " + filepath + mask + " >> " + (string)maskfile;
+    //system(temp.c_str());
 }
 
 char Servo::check_mask(string filepath){
