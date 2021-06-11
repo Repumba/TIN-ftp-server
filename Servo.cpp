@@ -89,8 +89,8 @@ string Servo::hash_password(string pas){
 }
 
 void Servo::create_maskfile(){
-    string temp = "echo . > " + (string)maskfile;
-    system(temp.c_str());
+    //string temp = "echo . > " + (string)maskfile;
+    //system(temp.c_str());
 }
 
 void Servo::lock_maskfile(){
@@ -135,7 +135,7 @@ void Servo::maskfile_append(string filepath){
 
 char Servo::check_mask(string filepath){
     lock_maskfile();
-    char mask;
+    char mask = '0';
     fstream f;
 
 #ifdef _WIN32
@@ -158,7 +158,7 @@ char Servo::check_mask(string filepath){
 
 void Servo::set_mask(string filepath, char mask){
     lock_maskfile();
-    char cur_mask;
+    char cur_mask = '0';
     fstream f;
 
 #ifdef _WIN32
@@ -186,7 +186,7 @@ void Servo::set_mask(string filepath, char mask){
 
 void Servo::unset_mask(string filepath, char mask){
     lock_maskfile();
-    char cur_mask;
+    char cur_mask = '0';
     fstream f;
 
 #ifdef _WIN32
