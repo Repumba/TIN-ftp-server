@@ -1,6 +1,81 @@
 #include "Klient.h"
 using namespace std;
 
+#ifdef _WIN32
+#include <conio.h>
+string getpass(bool show_asterisk=true)
+{
+    const char BACKSPACE=8;
+    const char RETURN=13;
+
+    string password;
+    unsigned char ch=0;
+
+    while((ch=getch())!=RETURN){
+        if(ch==BACKSPACE){
+            if(password.length()!=0){
+                if(show_asterisk)
+                    cout <<"\b \b";
+                password.resize(password.length()-1);
+            }
+        } else if(ch==0 || ch==224){ // handle escape sequences
+            getch(); // ignore non printable chars
+            continue;
+        } else {
+             password+=ch;
+             if(show_asterisk)
+                 cout <<'*';
+         }
+    }
+    cout <<endl;
+    return password;
+}
+#else
+
+#include <termios.h>
+#include <unistd.h>
+#include <stdio.h>
+
+int getch() {
+    int ch;
+    struct termios t_old, t_new;
+
+    tcgetattr(STDIN_FILENO, &t_old);
+    t_new = t_old;
+    t_new.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &t_new);
+    ch = getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &t_old);
+    return ch;
+}
+
+string getpass(bool show_asterisk=true)
+{
+    const char BACKSPACE=127;
+    const char RETURN=10;
+
+    string password;
+    unsigned char ch=0;
+
+    while((ch=getch())!=RETURN){
+        if(ch==BACKSPACE){
+            if(password.length()!=0){
+                 if(show_asterisk)
+                    cout <<"\b \b";
+                 password.resize(password.length()-1);
+            }
+        } else {
+            password+=ch;
+            if(show_asterisk)
+                cout <<'*';
+        }
+    }
+    cout <<endl;
+    return password;
+}
+
+#endif // _WIN32
+
 Klient::Klient(){
 
 }
@@ -30,7 +105,7 @@ int Klient::login(){
         cout << "Username: ";
         cin >> username;
         cout << "Password: ";
-        cin >> password;
+        password = getpass();
         if(server.send(username.c_str(), 100) != sf::Socket::Done)
             return 1;
         if(server.send(password.c_str(), 100) != sf::Socket::Done)
@@ -138,6 +213,7 @@ int Klient::ask_send_file(){
 int Klient::ask_receive_file(){
     char* nazwa_pliku = read_input("Podaj nazwe pliku na serwerze\n");
     char* lokalny_plik = read_input("Podaj nazwe pliku lokalnego\n");
+
     if(send_command('c') != 0)
         return 1;
     if(server.send(nazwa_pliku, 100) != sf::Socket::Done)
