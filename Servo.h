@@ -11,8 +11,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "SFML/Network.hpp"
-#include "sha256.h"
 #include "myFile.h"
+#include "sha256.h"
 
 #ifndef SERVO_H
 #define SERVO_H
@@ -22,12 +22,14 @@ private:
     std::vector<MyFile*> pliki;
     long long mod = 1e9+7;
     long long p = 997;
-    int maxSize=1000000;
-    int currentSize=0;
+    int maxSize = 1000000;
+    int currentSize = 0;
     std::string userName;
     sf::TcpListener listener;
     sf::TcpSocket client;
     std::string path="";
+    std::string maskfile = "access.masks";
+    std::string maskfile_lock = ".lock";
 
     std::string hash_password(std::string);
     void update_fs();
@@ -43,6 +45,14 @@ private:
     int lock_file();
     int unlock_file();
     bool exist_file(std::string);
+
+    void lock_maskfile();
+    void unlock_maskfile();
+    void delete_maskfile();
+    bool check_maskfile_lock();
+    char check_mask(std::string);
+    void set_mask(std::string, char);
+    void unset_mask(std::string, char);
 
     int chars_to_int(char*);
     char* int_to_chars(int);

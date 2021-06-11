@@ -195,10 +195,8 @@ int Klient::ask_change_directory(){
 
 int Klient::ask_lock_file(){
     char* selected_file = read_input("Jaki plik zablokowac?\n");
-    char* new_mask = read_input("0 - zablokuj zapis\n1 - zablokuj odczyt\n2 - powrot\n");
+    char* new_mask = read_input("0 - powrot\n1 - zablokuj zapis\n2 - zablokuj odczyt\n");
     new_mask[1] = '\0';
-    if(new_mask[0] == '2')
-        return 0;
     if(send_command('g') != 0)
         return 1;
     if(server.send(selected_file, 100) != sf::Socket::Done)
@@ -210,10 +208,8 @@ int Klient::ask_lock_file(){
 
 int Klient::ask_unlock_file(){
     char* selected_file = read_input("Jaki plik odblokowac?\n");
-    char* new_mask = read_input("0 - odblokuj zapis\n1 - odblokuj odczyt\n2 - powrot\n");
+    char* new_mask = read_input("0 - powrot\n1 - odblokuj zapis\n2 - odblokuj odczyt\n");
     new_mask[1] = '\0';
-    if(new_mask[0] == '2')
-        return 0;
     if(send_command('h') != 0)
         return 1;
     if(server.send(selected_file, 100) != sf::Socket::Done)

@@ -1,7 +1,4 @@
 #include <iostream>
-#include <cstdlib>
-#include <signal.h>
-#include <unistd.h>
 #include <map>
 #include <fstream>
 #include <string>
@@ -11,6 +8,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <cstdlib>
+#include <signal.h>
+#include <unistd.h>
 #include "SFML/Network.hpp"
 #include "Servo.h"
 #include "Klient.h"
@@ -59,6 +59,8 @@ char* int_to_chars(int val){
 }
 
 int main(){
+//    cout << hash_pass("nice");
+//    return 0;
 
     int choice = -1;
     cout << "Do you want to be: \n0 - Server \n1 - Client \nIf you want to exit, type anything else" << endl;
@@ -71,7 +73,7 @@ int main(){
         int c_port = 20000;
 //        cout << "Specify main port: ";
 //        cin >> c_port;
-	signal(SIGINT, signal_callback_handler);
+        signal(SIGINT, signal_callback_handler);
         sf::TcpSocket new_client;
         int port_modif = 0;
         main_listener.listen(c_port);
