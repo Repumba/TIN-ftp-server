@@ -5,7 +5,6 @@ using namespace std;
 #include <string>
 #include <windows.h>
 #include <iostream>
-#include "sha256.h"
 
 string ExePath() {
     char buffer[MAX_PATH] = { 0 };
@@ -28,6 +27,7 @@ Servo::Servo(int portNum){
         pthread_exit(0);
     }
     error_handler(wait_for_password());
+    create_maskfile();
     this->update_fs();
 }
 
@@ -35,6 +35,7 @@ Servo::~Servo(){
     //client.disconnect();
     for(unsigned int i=0; i<pliki.size(); ++i)
         delete pliki[i];
+    delete_maskfile();
     pthread_exit(0);
 }
 
@@ -79,13 +80,145 @@ char* Servo::int_to_chars(int val){
 
 string Servo::hash_password(string pas){
     return sha256(pas);
+    /*if(pas.size() <= 0)
+        return -1;
+    long long val = pas[0];
+    for(unsigned int i=1; i<pas.size(); ++i)
+        val = (val*p + pas[i]) % mod;
+    return val;*/
+}
+
+void Servo::create_maskfile(){
+    string temp = "echo . > " + (string)maskfile;
+    system(temp.c_str());
+}
+
+void Servo::lock_maskfile(){
+    while(!check_maskfile_lock()){
+        string command = "echo . > " + maskfile + maskfile_lock;
+        system(command.c_str());
+    }
+}
+
+void Servo::unlock_maskfile(){
+    string command;
+#ifdef _WIN32
+        command = "del ";
+# else
+        command = "rm ";
+#endif // _WIN32
+    command += maskfile + maskfile_lock;
+    system(command.c_str());
+}
+
+void Servo::delete_maskfile(){
+    string command;
+#ifdef _WIN32
+        command = "del ";
+# else
+        command = "rm ";
+#endif // _WIN32
+    string temp = command + (string)maskfile;
+    system(temp.c_str());
+}
+
+bool Servo::check_maskfile_lock(){
+    ifstream f(maskfile + maskfile_lock);
+    return f.good();
+}
+
+void Servo::maskfile_append(string filepath){
+    char mask = '0';
+    string temp = "echo " + filepath + mask + " >> " + (string)maskfile;
+    system(temp.c_str());
+}
+
+char Servo::check_mask(string filepath){
+    lock_maskfile();
+    char mask;
+    fstream f;
+
+#ifdef _WIN32
+    f.open(maskfile, ios_base::in);
+#else
+    f.open(maskfile, ios::in);
+#endif // _WIN32
+
+    string s;
+    while(f >> s){
+        if (s.substr(0, s.size()-1) == filepath)
+            mask = s[s.size()-1];
+    }
+    f.close();
+    unlock_maskfile();
+
+    mask -= '0';
+    return mask;
+}
+
+void Servo::set_mask(string filepath, char mask){
+    lock_maskfile();
+    char cur_mask;
+    fstream f;
+
+#ifdef _WIN32
+    f.open(maskfile, ios_base::in);
+#else
+    f.open(maskfile, ios::in);
+#endif // _WIN32
+
+    string s;
+    while(f >> s){
+        if (s.substr(0, s.size()-1) == filepath){
+            cur_mask = s[s.size()-1];
+        }
+    }
+    cur_mask -= '0';
+    cur_mask = cur_mask | mask;
+    cur_mask += '0';
+
+    f.close();
+    string temp = "echo " + filepath + cur_mask + " >> " + (string)maskfile;
+    system(temp.c_str());
+    unlock_maskfile();
+}
+
+
+void Servo::unset_mask(string filepath, char mask){
+    lock_maskfile();
+    char cur_mask;
+    fstream f;
+
+#ifdef _WIN32
+    f.open(maskfile, ios_base::in);
+#else
+    f.open(maskfile, ios::in);
+#endif // _WIN32
+
+    string s;
+    while(getline(f, s)){
+        if (s.substr(0, s.size()-2) == filepath){
+            cur_mask = s.back();
+        }
+    }
+
+    cur_mask -= '0';
+    cur_mask = cur_mask & ~mask;
+    cur_mask += '0';
+
+    f.close();
+    string temp = "echo " + filepath + cur_mask + " >> " + (string)maskfile;
+    system(temp.c_str());
+    unlock_maskfile();
 }
 
 void Servo::update_fs(){
+    lock_maskfile();
+    create_maskfile();
     for(unsigned int i=0; i<pliki.size(); ++i)
         delete pliki[i];
+    int files_size = 0;
     pliki.clear();
-    int files_size=0;
 
 #ifdef _WIN32
     string system_path = ExePath();
@@ -102,8 +235,8 @@ void Servo::update_fs(){
         MyFile* new_file = new MyFile;
         new_file->path = s.substr(0,pos);
         new_file->name = s.substr(pos, s.size());
-        new_file->mask = 0;
         new_file->isDir = new_file->name.find(".") == string::npos ? true : false;
+        maskfile_append(new_file->path + new_file->name);
         pliki.push_back(new_file);
         int len = userName.size();
         if(new_file->path.substr(0,len) == userName){
@@ -115,7 +248,7 @@ void Servo::update_fs(){
     f.close();
     system("del temp.txt");
     currentSize = files_size;
-    return;
+
 #else
     system("ls -1R > temp.txt");
 
@@ -135,23 +268,25 @@ void Servo::update_fs(){
         MyFile* nowy_plik = new MyFile;
         nowy_plik->name = s;
         nowy_plik->path = sciezka;
-        nowy_plik->isDir = s.find('.') == string::npos ? true : false;
-        nowy_plik->mask = 0;
+        nowy_plik->isDir = s.find(".") == string::npos ? true : false;
+        maskfile_append(sciezka + s);
         pliki.push_back(nowy_plik);
         int len = userName.size();
-        if(!nowy_plik->isDir && nowy_plik->path.substr(0,len) == userName){
+        if(nowy_plik->path.substr(0,len) == userName){
             struct stat sb;
-	    s = path + s;
+            s = path + s;
             if(stat(s.c_str(), &sb) == -1)
-		continue;
+                continue;
             files_size += sb.st_size;
         }
     }
     f.close();
     system("rm temp.txt");
     currentSize = files_size;
-    return;
+
+
 #endif // _WIN32
+    unlock_maskfile();
 }
 
 int Servo::wait_for_password(){
@@ -179,20 +314,18 @@ int Servo::wait_for_password(){
 }
 
 bool Servo::check_password(string user, string passwd){
-
     fstream f;
     f.open("passwd.txt", ios::in);
     if(!f.is_open()){
         cout << "Error no passwd file" << endl;
         exit(1);
     }
+
     string read_user;
     string read_hash;
     string read_salt;
     while(f >> read_user >> read_hash >> read_salt){
-
         if (user == read_user){
-
             string hash = sha256(read_salt + passwd);
             if (hash == read_hash){
                 f.close();
@@ -201,8 +334,6 @@ bool Servo::check_password(string user, string passwd){
             else{
                 break;
             }
-
-        }
     }
     f.close();
     return false;
@@ -250,6 +381,7 @@ int Servo::send_file(){
     }
 
     fstream pliczek;
+    set_mask(path+nazwa_pliku, 2);
     pliczek.open(path+nazwa_pliku, fstream::in);
     if(!pliczek.is_open()){
         return -1;
@@ -269,6 +401,8 @@ int Servo::send_file(){
     while(!pliczek.eof()){
         pliczek.get(tab[w++]);
     }
+    pliczek.close();
+    unset_mask(path+nazwa_pliku, 2);
     tab[size_of_file] = '\0';
 
     if(client.send(int_to_chars(size_of_file), 100) != sf::Socket::Done) //send to client the size of the file
@@ -290,21 +424,18 @@ int Servo::receive_file(){
 
     int rozmiar_pliku = chars_to_int(np);
     char dane[rozmiar_pliku+1];
+
     if(client.receive(dane, rozmiar_pliku, received) != sf::Socket::Done) //wczytanie, zeby sie nie popsulo
-            return 1;
-
-    if(nazwa_pliku.find("/") != string::npos || nazwa_pliku.find(".") == string::npos){
+        return 1;
+    if(nazwa_pliku.find("/") != string::npos || nazwa_pliku.find(".") == string::npos)
         return 11;
-    }
-
-    if(exist_file(nazwa_pliku)){
+    if(exist_file(nazwa_pliku))
         return 4;
-    }
-    if(currentSize+rozmiar_pliku > maxSize){
+    if(currentSize+rozmiar_pliku > maxSize)
         return 9;
-    }
 
     fstream pliczek;
+    set_mask(path+nazwa_pliku, 1);
     pliczek.open(path+nazwa_pliku, fstream::out);
     if(!pliczek.is_open()){
         return -1;
@@ -312,6 +443,7 @@ int Servo::receive_file(){
     dane[rozmiar_pliku] = '\0';
     pliczek << dane;
     pliczek.close();
+    unset_mask(path+nazwa_pliku, 1);
 
     this->update_fs();
     return 0;
@@ -330,6 +462,10 @@ int Servo::delete_file(){
         return 11;
     }
     string abs_path = path + nazwa_pliku;
+    char mask = check_mask(abs_path);
+    if(mask == 1) return 6;
+    if(mask == 2) return 5;
+
     for(unsigned int i=0; i<pliki.size(); ++i){
         if(pliki[i]->path + pliki[i]->name == abs_path){
 #ifdef _WIN32
@@ -421,7 +557,7 @@ int Servo::lock_file(){
     string nazwa_pliku = np;
     if(client.receive(np, 5, received) != sf::Socket::Done)
         return 1;
-//tylko serwer
+
     if(!exist_file(nazwa_pliku)){
         return 3;
     }
@@ -429,11 +565,13 @@ int Servo::lock_file(){
         return 11;
     }
 
-    char mask = np[0];
+    char mask = np[0] - '0';
+    if(mask == 0)
+        return 0;
     string abs_path = path + nazwa_pliku;
     for(unsigned int i=0; i<pliki.size(); ++i){
         if(pliki[i]->path + pliki[i]->name == abs_path){
-            pliki[i]->mask = pliki[i]->mask | mask;
+            set_mask(abs_path, mask);
             return 0;
         }
     }
@@ -456,12 +594,13 @@ int Servo::unlock_file(){
         return 11;
     }
 
-    char mask = np[0];
-    mask = ~mask;
+    char mask = np[0] - '0';
+    if(mask == 0)
+        return 0;
     string abs_path = path + nazwa_pliku;
     for(unsigned int i=0; i<pliki.size(); ++i){
         if(pliki[i]->path + pliki[i]->name == abs_path){
-            pliki[i]->mask = pliki[i]->mask & mask;
+            unset_mask(abs_path, mask);
             return 0;
         }
     }

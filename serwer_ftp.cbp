@@ -38,6 +38,8 @@
 		<Unit filename="Servo.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="myFile.h" />
+		<Unit filename="sha256.cpp" />
+		<Unit filename="sha256.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
