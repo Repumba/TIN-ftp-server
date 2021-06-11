@@ -16,8 +16,10 @@ Kompilacja oraz uruchomienie w środowisku Windows bardzo zależy od używanego 
 Na potrzeby projektu postawiłem własny serwer ftp na RaspberryPi. Dane serwera: <br>
 `IP:` 94.75.112.77 <br>
 `Port:` 20000 <br>
+W przypadku chęci testów na innym komputerze, należy wprowadzić odpowiedni adres IP. Numer portu jest określony w kodzie (w pliku main.cpp), w przypadku chęci zmiany, konieczna jest lekka modyfikacja kodu. <br>
 
-W celu zalogowania się konieczne są login oraz hasło (utworzenie danych logowania możliwe poprzez kontakt z administratorem).
+W celu zalogowania się konieczne są login, hasło oraz utworzenie folderu na serwerze o takiej samej nazwie, jak nazwa użytkownika.
+Utworzenie konta możliwe poprzez kontakt z administratorem serwera.
 
 ## Poruszanie się po serwerze
 
@@ -32,5 +34,9 @@ W celu zalogowania się konieczne są login oraz hasło (utworzenie danych logow
 * `h` - odblokowanie pliku
 * `x` - zakończ połączenie
 
+Zablokowanie oraz odblokowanie pliku są dostępne, aby dało się przetestować te funkcjonalności. Zakładamy, że w wersji release, zakładanie oraz zdejmowanie blokad, byłoby wykonywanie wyłącznie przez serwer.
+
 ## Instalacja SFML:
+Nasz projekt napisaliśmy w oparciu o wersję SFML 2.1, dlatego też zalecamy użycie tej samej.
 https://www.sfml-dev.org/tutorials/2.5/
+https://www.sfml-dev.org/download/sfml/2.1/
