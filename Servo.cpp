@@ -334,6 +334,7 @@ bool Servo::check_password(string user, string passwd){
             else{
                 break;
             }
+        }
     }
     f.close();
     return false;
