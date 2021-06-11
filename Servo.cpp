@@ -255,7 +255,6 @@ void Servo::update_fs(){
         nowy_plik->name = s;
         nowy_plik->path = sciezka;
         nowy_plik->isDir = s.find(".") == string::npos ? true : false;
-        maskfile_append(sciezka + s);
         pliki.push_back(nowy_plik);
         int len = userName.size();
         if(nowy_plik->path.substr(0,len) == userName){
