@@ -32,12 +32,12 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="Klient.cpp" />
-		<Unit filename="Klient.h" />
+		<Unit filename="Client.cpp" />
+		<Unit filename="Client.h" />
+		<Unit filename="MyFile.h" />
 		<Unit filename="Servo.cpp" />
 		<Unit filename="Servo.h" />
 		<Unit filename="main.cpp" />
-		<Unit filename="myFile.h" />
 		<Unit filename="sha256.cpp" />
 		<Unit filename="sha256.h" />
 		<Extensions>

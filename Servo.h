@@ -10,8 +10,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <chrono>
+#include <ctime>
 #include "SFML/Network.hpp"
-#include "myFile.h"
+#include "MyFile.h"
 #include "sha256.h"
 
 #ifndef SERVO_H
@@ -19,9 +21,7 @@
 
 class Servo{
 private:
-    std::vector<MyFile*> pliki;
-    long long mod = 1e9+7;
-    long long p = 997;
+    std::vector<MyFile*> filesList;
     int maxSize = 1000000;
     int currentSize = 0;
     std::string userName;
@@ -29,7 +29,7 @@ private:
     sf::TcpSocket client;
     std::string path="";
     std::string maskfile = "access.masks";
-    std::string maskfile_lock = ".lock";
+    std::string maskfileLock = ".lock";
 
     std::string hash_password(std::string);
     void update_fs();
