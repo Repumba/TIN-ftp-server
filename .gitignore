@@ -7,6 +7,9 @@ krystian/
 pawel/
 piotr/
 
+server.logs
+access.masks
+
 # Prerequisites
 *.d
 

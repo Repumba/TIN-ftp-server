@@ -320,7 +320,7 @@ int Servo::wait_for_password(){
 
             //log event
             time_t currentTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
-            string tempCommand = (string)ctime(&currentTime) + " user " + userName + " logged in successfully from ip " + client.getRemoteAddress().toString();
+            string tempCommand = ((string)ctime(&currentTime)).substr(0,19) + " user " + userName + " logged in successfully from ip " + client.getRemoteAddress().toString();
             cout << tempCommand << '\n';
             tempCommand = "echo " + tempCommand + " >> server.logs";
             system(tempCommand.c_str());
@@ -441,7 +441,7 @@ int Servo::send_file(){
         return 1;
 
     time_t currentTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
-    string tempCommand = (string)ctime(&currentTime) + " user " + userName + " downloaded file " + path+fileName;
+    string tempCommand = ((string)ctime(&currentTime)).substr(0,19) + " user " + userName + " downloaded file " + path+fileName;
     cout << tempCommand << '\n';
     tempCommand = "echo " + tempCommand + " >> server.logs";
     system(tempCommand.c_str());
@@ -484,7 +484,7 @@ int Servo::receive_file(){
     unset_mask(path+fileName, 1);
 
     time_t currentTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
-    string tempCommand = (string)ctime(&currentTime) + " received file " + path+fileName + " from user " + userName;
+    string tempCommand = ((string)ctime(&currentTime)).substr(0,19) + " received file " + path+fileName + " from user " + userName;
     cout << tempCommand << '\n';
     tempCommand = "echo " + tempCommand + " >> server.logs";
     system(tempCommand.c_str());
@@ -515,7 +515,7 @@ int Servo::delete_file(){
     if(mask == 2) return 5;
 
     time_t currentTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
-    string tempCommand = (string)ctime(&currentTime) + " user " + userName + " deleted file " + path+fileName;
+    string tempCommand = ((string)ctime(&currentTime)).substr(0,19) + " user " + userName + " deleted file " + path+fileName;
     cout << tempCommand << '\n';
     tempCommand = "echo " + tempCommand + " >> server.logs";
     system(tempCommand.c_str());
@@ -567,7 +567,7 @@ int Servo::make_directory(){
     this->update_fs();
 
     time_t currentTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
-    string tempCommand = (string)ctime(&currentTime) + " user " + userName + " created new directory " + path+folderName;
+    string tempCommand = ((string)ctime(&currentTime)).substr(0,19) + " user " + userName + " created new directory " + path+folderName;
     cout << tempCommand << '\n';
     tempCommand = "echo " + tempCommand + " >> server.logs";
     system(tempCommand.c_str());
@@ -641,7 +641,7 @@ int Servo::lock_file(){
             set_mask(absPath, mask);
 
             time_t currentTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
-            string tempCommand = (string)ctime(&currentTime) + " user " + userName + " locked file " + absPath;
+            string tempCommand = ((string)ctime(&currentTime)).substr(0,19) + " user " + userName + " locked file " + absPath;
             cout << tempCommand << '\n';
             tempCommand = "echo " + tempCommand + " >> server.logs";
             system(tempCommand.c_str());
@@ -679,7 +679,7 @@ int Servo::unlock_file(){
             unset_mask(absPath, mask);
 
             time_t currentTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
-            string tempCommand = (string)ctime(&currentTime) + " user " + userName + " unlocked file " + absPath;
+            string tempCommand = ((string)ctime(&currentTime)).substr(0,19) + " user " + userName + " unlocked file " + absPath;
             cout << tempCommand << '\n';
             tempCommand = "echo " + tempCommand + " >> server.logs";
             system(tempCommand.c_str());
@@ -708,7 +708,7 @@ void Servo::error_handler(int errCode){
 
     if(userName != ""){
         time_t currentTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
-        temporaryCommand = (string)ctime(&currentTime) + " user " + userName + ": ";
+        temporaryCommand = ((string)ctime(&currentTime)).substr(0,19) + " user " + userName + ": ";
         cout << ctime(&currentTime) << " user " << userName << ": ";
     }
 
